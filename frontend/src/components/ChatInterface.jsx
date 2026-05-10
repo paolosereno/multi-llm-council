@@ -6,7 +6,7 @@ import Stage3 from './Stage3';
 import './ChatInterface.css';
 
 function buildMarkdown(conversation) {
-  const lines = [`# ${conversation.title || 'LLM Council Conversation'}`, ''];
+  const lines = [`# ${conversation.title || 'Multi LLM Council Conversation'}`, ''];
 
   let qIndex = 0;
   for (const msg of conversation.messages) {
@@ -125,7 +125,7 @@ export default function ChatInterface({
     return (
       <div className="chat-interface">
         <div className="empty-state">
-          <h2>Welcome to LLM Council</h2>
+          <h2>Welcome to Multi LLM Council</h2>
           <p>Create a new conversation to get started</p>
         </div>
       </div>
@@ -150,7 +150,7 @@ export default function ChatInterface({
         {conversation.messages.length === 0 ? (
           <div className="empty-state">
             <h2>Start a conversation</h2>
-            <p>Ask a question to consult the LLM Council</p>
+            <p>Ask a question to consult the Multi LLM Council</p>
           </div>
         ) : (
           conversation.messages.map((msg, index) => (
@@ -167,7 +167,7 @@ export default function ChatInterface({
               ) : (
                 <div className="assistant-message">
                   <div className="assistant-message-header">
-                    <div className="message-label">LLM Council</div>
+                    <div className="message-label">Multi LLM Council</div>
                     {msg.stage3 && !msg.loading?.stage3 && (
                       <button
                         className="rerun-btn"

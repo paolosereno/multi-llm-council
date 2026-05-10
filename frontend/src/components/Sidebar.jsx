@@ -40,7 +40,7 @@ export default function Sidebar({
         />
       )}
       <div className="sidebar-header">
-        <h1 className="sidebar-title">LLM Council</h1>
+        <h1 className="sidebar-title">Multi LLM Council</h1>
         <div className="sidebar-header-actions">
           <button className="theme-toggle-btn" onClick={onToggleTheme} title="Toggle theme">
             {theme === 'dark' ? '☀' : '☾'}
