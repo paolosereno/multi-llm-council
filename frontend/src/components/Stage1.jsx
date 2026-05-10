@@ -4,6 +4,7 @@ import './Stage1.css';
 
 export default function Stage1({ responses }) {
   const [activeTab, setActiveTab] = useState(0);
+  const [collapsed, setCollapsed] = useState(false);
 
   if (!responses || responses.length === 0) {
     return null;
@@ -11,9 +12,12 @@ export default function Stage1({ responses }) {
 
   return (
     <div className="stage stage1">
-      <h3 className="stage-title">Stage 1: Individual Responses</h3>
+      <div className="stage-header" onClick={() => setCollapsed(!collapsed)}>
+        <h3 className="stage-title">Stage 1: Individual Responses</h3>
+        <span className="collapse-toggle">{collapsed ? '▶' : '▼'}</span>
+      </div>
 
-      <div className="tabs">
+      {!collapsed && <><div className="tabs">
         {responses.map((resp, index) => (
           <button
             key={index}
@@ -30,7 +34,7 @@ export default function Stage1({ responses }) {
         <div className="response-text markdown-content">
           <ReactMarkdown>{responses[activeTab].response}</ReactMarkdown>
         </div>
-      </div>
+      </div></>}
     </div>
   );
 }

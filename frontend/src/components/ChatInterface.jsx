@@ -64,6 +64,8 @@ export default function ChatInterface({
   isLoading,
 }) {
   const [input, setInput] = useState('');
+  const [systemPrompt, setSystemPrompt] = useState('');
+  const [showSystemPrompt, setShowSystemPrompt] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -77,7 +79,7 @@ export default function ChatInterface({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (input.trim() && !isLoading) {
-      onSendMessage(input);
+      onSendMessage(input, systemPrompt || null);
       setInput('');
     }
   };
@@ -201,22 +203,43 @@ export default function ChatInterface({
 
       {conversation.messages.length === 0 && (
         <form className="input-form" onSubmit={handleSubmit}>
-          <textarea
-            className="message-input"
-            placeholder="Ask your question... (Shift+Enter for new line, Enter to send)"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={isLoading}
-            rows={3}
-          />
-          <button
-            type="submit"
-            className="send-button"
-            disabled={!input.trim() || isLoading}
-          >
-            Send
-          </button>
+          <div className="system-prompt-section">
+            <button
+              type="button"
+              className="system-prompt-toggle"
+              onClick={() => setShowSystemPrompt(!showSystemPrompt)}
+            >
+              {showSystemPrompt ? '▼' : '▶'} System Prompt
+              {systemPrompt && <span className="system-prompt-dot"> ●</span>}
+            </button>
+            {showSystemPrompt && (
+              <textarea
+                className="system-prompt-input"
+                placeholder="Optional: guide the council (e.g. 'Answer in Italian', 'You are a legal expert')"
+                value={systemPrompt}
+                onChange={(e) => setSystemPrompt(e.target.value)}
+                rows={2}
+              />
+            )}
+          </div>
+          <div className="input-row">
+            <textarea
+              className="message-input"
+              placeholder="Ask your question... (Shift+Enter for new line, Enter to send)"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={isLoading}
+              rows={3}
+            />
+            <button
+              type="submit"
+              className="send-button"
+              disabled={!input.trim() || isLoading}
+            >
+              Send
+            </button>
+          </div>
         </form>
       )}
     </div>

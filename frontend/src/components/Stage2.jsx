@@ -16,6 +16,7 @@ function deAnonymizeText(text, labelToModel) {
 
 export default function Stage2({ rankings, labelToModel, aggregateRankings }) {
   const [activeTab, setActiveTab] = useState(0);
+  const [collapsed, setCollapsed] = useState(true);
 
   if (!rankings || rankings.length === 0) {
     return null;
@@ -23,9 +24,12 @@ export default function Stage2({ rankings, labelToModel, aggregateRankings }) {
 
   return (
     <div className="stage stage2">
-      <h3 className="stage-title">Stage 2: Peer Rankings</h3>
+      <div className="stage-header" onClick={() => setCollapsed(!collapsed)}>
+        <h3 className="stage-title">Stage 2: Peer Rankings</h3>
+        <span className="collapse-toggle">{collapsed ? '▶' : '▼'}</span>
+      </div>
 
-      <h4>Raw Evaluations</h4>
+      {!collapsed && <><h4>Raw Evaluations</h4>
       <p className="stage-description">
         Each model evaluated all responses (anonymized as Response A, B, C, etc.) and provided rankings.
         Below, model names are shown in <strong>bold</strong> for readability, but the original evaluation used anonymous labels.
@@ -93,7 +97,7 @@ export default function Stage2({ rankings, labelToModel, aggregateRankings }) {
             ))}
           </div>
         </div>
-      )}
+      )}</>}
     </div>
   );
 }

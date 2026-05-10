@@ -1,26 +1,58 @@
 """Configuration for the LLM Council."""
 
 import os
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# OpenRouter API key
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-# Council members - list of OpenRouter model identifiers
 COUNCIL_MODELS = [
-    "qwen/qwen3.6-35b-a3b",
-    "google/gemini-3-flash-preview",
-    "anthropic/claude-sonnet-4.6",
-    "x-ai/grok-4.3",
+    "inclusionai/ring-2.6-1t:free",
+    "baidu/qianfan-ocr-fast:free",
+    "minimax/minimax-m2.5:free",
 ]
 
-# Chairman model - synthesizes final response
-CHAIRMAN_MODEL = "anthropic/claude-opus-4.7"
+CHAIRMAN_MODEL = "x-ai/grok-4.1-fast"
 
-# OpenRouter API endpoint
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# Data directory for conversation storage
 DATA_DIR = "data/conversations"
+
+_runtime_config = None
+
+
+def _config_path():
+    return os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "data", "council_config.json"
+    )
+
+
+def get_runtime_config():
+    global _runtime_config
+    if _runtime_config is None:
+        path = _config_path()
+        if os.path.exists(path):
+            with open(path) as f:
+                _runtime_config = json.load(f)
+        else:
+            _runtime_config = {
+                "council_models": list(COUNCIL_MODELS),
+                "chairman_model": CHAIRMAN_MODEL,
+            }
+    return _runtime_config
+
+
+def update_runtime_config(council_models: list, chairman_model: str) -> dict:
+    global _runtime_config
+    _runtime_config = {
+        "council_models": council_models,
+        "chairman_model": chairman_model,
+    }
+    path = _config_path()
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(_runtime_config, f, indent=2)
+    return _runtime_config

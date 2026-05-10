@@ -47,6 +47,28 @@ export const api = {
   },
 
   /**
+   * Get council configuration.
+   */
+  async getConfig() {
+    const response = await fetch(`${API_BASE}/api/config`);
+    if (!response.ok) throw new Error('Failed to get config');
+    return response.json();
+  },
+
+  /**
+   * Update council configuration.
+   */
+  async updateConfig(config) {
+    const response = await fetch(`${API_BASE}/api/config`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+    });
+    if (!response.ok) throw new Error('Failed to update config');
+    return response.json();
+  },
+
+  /**
    * Delete a conversation.
    */
   async deleteConversation(conversationId) {
@@ -87,7 +109,10 @@ export const api = {
    * @param {function} onEvent - Callback function for each event: (eventType, data) => void
    * @returns {Promise<void>}
    */
-  async sendMessageStream(conversationId, content, onEvent) {
+  async sendMessageStream(conversationId, content, systemPrompt, onEvent) {
+    const body = { content };
+    if (systemPrompt) body.system_prompt = systemPrompt;
+
     const response = await fetch(
       `${API_BASE}/api/conversations/${conversationId}/message/stream`,
       {
@@ -95,7 +120,7 @@ export const api = {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify(body),
       }
     );
 

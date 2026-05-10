@@ -140,11 +140,60 @@
 
 .input-form {
   display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  padding: 24px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 24px 24px;
   border-top: 1px solid var(--border);
   background: var(--bg-surface);
+}
+
+.system-prompt-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.system-prompt-toggle {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  width: fit-content;
+}
+
+.system-prompt-toggle:hover {
+  color: var(--text-primary);
+}
+
+.system-prompt-dot {
+  color: var(--primary);
+}
+
+.system-prompt-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.4;
+  outline: none;
+  resize: vertical;
+}
+
+.system-prompt-input:focus {
+  border-color: var(--primary);
+}
+
+.input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
 }
 
 .message-input {
