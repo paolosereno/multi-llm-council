@@ -65,6 +65,7 @@ export default function ChatInterface({
   onRerun,
   isLoading,
 }) {
+  const MAX_LENGTH = 10000;
   const [input, setInput] = useState('');
   const [systemPrompt, setSystemPrompt] = useState('');
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
@@ -310,15 +311,20 @@ export default function ChatInterface({
               className="message-input"
               placeholder="Ask your question... (Shift+Enter for new line, Enter to send)"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => setInput(e.target.value.slice(0, MAX_LENGTH))}
               onKeyDown={handleKeyDown}
               disabled={isLoading}
               rows={3}
             />
+            {input.length > MAX_LENGTH * 0.8 && (
+              <div className={`char-counter ${input.length >= MAX_LENGTH ? 'char-counter-limit' : ''}`}>
+                {input.length} / {MAX_LENGTH}
+              </div>
+            )}
             <button
               type="submit"
               className="send-button"
-              disabled={!input.trim() || isLoading}
+              disabled={!input.trim() || isLoading || input.length >= MAX_LENGTH}
             >
               Send
             </button>

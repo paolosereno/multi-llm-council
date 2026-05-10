@@ -46,7 +46,11 @@ async def stage1_collect_responses(
 
     stage1_results = []
     for model, response in responses.items():
-        if response is not None:
+        if response is None:
+            continue
+        if 'error' in response:
+            stage1_results.append({"model": model, "error": response['error'], "response": None})
+        else:
             stage1_results.append({
                 "model": model,
                 "response": response.get('content', ''),
@@ -68,16 +72,18 @@ async def stage2_collect_rankings(
 ) -> Tuple[List[Dict[str, Any]], Dict[str, str]]:
     council_models = _models_for_stage(execution_mode, 2)
 
-    labels = [chr(65 + i) for i in range(len(stage1_results))]
+    successful = [r for r in stage1_results if not r.get('error')]
+
+    labels = [chr(65 + i) for i in range(len(successful))]
 
     label_to_model = {
         f"Response {label}": result['model']
-        for label, result in zip(labels, stage1_results)
+        for label, result in zip(labels, successful)
     }
 
     responses_text = "\n\n".join([
         f"Response {label}:\n{result['response']}"
-        for label, result in zip(labels, stage1_results)
+        for label, result in zip(labels, successful)
     ])
 
     ranking_prompt = f"""You are evaluating different responses to the following question:
@@ -117,7 +123,7 @@ Now provide your evaluation and ranking:"""
 
     stage2_results = []
     for model, response in responses.items():
-        if response is not None:
+        if response is not None and 'error' not in response:
             full_text = response.get('content', '')
             parsed = parse_ranking_from_text(full_text)
             stage2_results.append({

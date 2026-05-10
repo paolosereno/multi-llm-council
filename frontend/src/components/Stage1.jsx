@@ -21,19 +21,27 @@ export default function Stage1({ responses }) {
         {responses.map((resp, index) => (
           <button
             key={index}
-            className={`tab ${activeTab === index ? 'active' : ''}`}
+            className={`tab ${activeTab === index ? 'active' : ''} ${resp.error ? 'tab-error' : ''}`}
             onClick={() => setActiveTab(index)}
           >
             {resp.model.split('/')[1] || resp.model}
+            {resp.error && ' ⚠'}
           </button>
         ))}
       </div>
 
       <div className="tab-content">
         <div className="model-name">{responses[activeTab].model}</div>
-        <div className="response-text markdown-content">
-          <ReactMarkdown>{responses[activeTab].response}</ReactMarkdown>
-        </div>
+        {responses[activeTab].error ? (
+          <div className="stage1-error">
+            <p>This model failed to respond.</p>
+            <p className="stage1-error-detail">{responses[activeTab].error}</p>
+          </div>
+        ) : (
+          <div className="response-text markdown-content">
+            <ReactMarkdown>{responses[activeTab].response}</ReactMarkdown>
+          </div>
+        )}
       </div></>}
     </div>
   );

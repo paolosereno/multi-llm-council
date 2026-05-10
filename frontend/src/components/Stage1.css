@@ -82,3 +82,31 @@
   color: var(--text-primary);
   line-height: 1.6;
 }
+
+.tab-error {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.tab-error.active {
+  border-color: #e74c3c;
+  border-bottom-color: var(--bg-elevated);
+  color: #e74c3c;
+}
+
+.stage1-error {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.stage1-error-detail {
+  margin-top: 8px;
+  font-family: monospace;
+  font-size: 12px;
+  color: #e74c3c;
+  background: var(--bg-surface);
+  padding: 8px;
+  border-radius: 4px;
+  word-break: break-all;
+}

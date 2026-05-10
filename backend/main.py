@@ -3,7 +3,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import List, Dict, Any, Optional
 import os
 import uuid
@@ -37,6 +37,16 @@ class SendMessageRequest(BaseModel):
     system_prompt: Optional[str] = None
     history: Optional[List[Dict[str, str]]] = None
     execution_mode: str = 'normal'
+
+    @field_validator('content')
+    @classmethod
+    def content_valid(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError('Message cannot be empty')
+        if len(v) > 10000:
+            raise ValueError('Message too long (max 10,000 characters)')
+        return v
 
 
 class CouncilConfigRequest(BaseModel):
