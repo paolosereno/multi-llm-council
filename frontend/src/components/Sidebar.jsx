@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import SettingsModal from './SettingsModal';
 import StatsModal from './StatsModal';
+import HelpModal from './HelpModal';
 import './Sidebar.css';
 
 export default function Sidebar({
@@ -14,6 +15,7 @@ export default function Sidebar({
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [search, setSearch] = useState('');
 
   const filteredConversations = search.trim()
@@ -26,6 +28,7 @@ export default function Sidebar({
     <div className="sidebar">
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
       {statsOpen && <StatsModal onClose={() => setStatsOpen(false)} />}
+      {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
       <div className="sidebar-header">
         <div className="sidebar-header-top">
           <h1>LLM Council</h1>
@@ -35,6 +38,9 @@ export default function Sidebar({
             </button>
             <button className="theme-toggle-btn" onClick={() => setStatsOpen(true)} title="Model statistics">
               ▤
+            </button>
+            <button className="theme-toggle-btn" onClick={() => setHelpOpen(true)} title="Help">
+              ?
             </button>
             <button className="theme-toggle-btn" onClick={() => setSettingsOpen(true)} title="Settings">
               ⚙
