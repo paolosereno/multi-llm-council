@@ -30,9 +30,10 @@ This is a fork of [karpathy/llm-council](https://github.com/karpathy/llm-council
 ![Screenshot 2](screenshot2.jpg)
 *Quick Reference panel — Stage 2 peer rankings and aggregate model rankings visible in the background*
 
-![Screenshot 3](screenshot3.jpg)
-
-*Council Settings — execution modes overview and model list configuration (Fast, Budget, Chairman)*
+<p align="center">
+<img src="screenshot3.jpg" alt="Screenshot 3"><br>
+<em>Council Settings — execution modes overview and model list configuration (Fast, Budget, Chairman)</em>
+</p>
 
 ![Screenshot 4](screenshot4.jpg)
 *Chat interface after a council run — three collapsible stages with Budget mode active*
