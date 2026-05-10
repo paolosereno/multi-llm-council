@@ -222,6 +222,11 @@
   color: #fff;
 }
 
+.context-toggle:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .system-prompt-dot {
   color: var(--primary);
 }

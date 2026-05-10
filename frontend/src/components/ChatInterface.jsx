@@ -241,16 +241,15 @@ export default function ChatInterface({
                 {showSystemPrompt ? '▼' : '▶'} System Prompt
                 {systemPrompt && <span className="system-prompt-dot"> ●</span>}
               </button>
-              {conversation.messages.length > 0 && (
-                <button
-                  type="button"
-                  className={`context-toggle ${includeContext ? 'active' : ''}`}
-                  onClick={() => setIncludeContext(!includeContext)}
-                  title="Include previous messages as context"
-                >
-                  Include context
-                </button>
-              )}
+              <button
+                type="button"
+                className={`context-toggle ${includeContext ? 'active' : ''}`}
+                onClick={() => setIncludeContext(!includeContext)}
+                disabled={conversation.messages.length === 0}
+                title={conversation.messages.length === 0 ? 'No previous messages to include' : 'Include previous messages as context'}
+              >
+                Include context
+              </button>
             </div>
             {showSystemPrompt && (
               <textarea
