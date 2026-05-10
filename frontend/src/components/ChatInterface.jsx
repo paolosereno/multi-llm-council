@@ -273,14 +273,28 @@ export default function ChatInterface({
                 <button
                   key={id}
                   type="button"
-                  className={`mode-btn ${executionMode === id ? 'active' : ''}`}
+                  className={`mode-btn ${executionMode === id ? 'active' : ''} ${executionMode === id && warn ? 'mode-btn-warn' : ''}`}
                   onClick={() => setExecutionMode(id)}
-                  title={warn ? 'Model list not configured — will use Council models as fallback' : undefined}
                 >
-                  {label}{warn && <span className="mode-warn">⚠</span>}
+                  {label}
                 </button>
               ))}
             </div>
+            {executionMode === 'fast' && emptyLists.fast && (
+              <p className="mode-warning">
+                ⚠ Fast models not configured — Council models will be used for all stages. Configure them in ⚙ Settings.
+              </p>
+            )}
+            {executionMode === 'budget' && emptyLists.budget && (
+              <p className="mode-warning">
+                ⚠ Budget models not configured — Council models will be used for all stages. Configure them in ⚙ Settings.
+              </p>
+            )}
+            {executionMode === 'hybrid' && emptyLists.budget && (
+              <p className="mode-warning">
+                ⚠ Budget models not configured — Council models will be used for Stage 2. Configure them in ⚙ Settings.
+              </p>
+            )}
             {showSystemPrompt && (
               <textarea
                 className="system-prompt-input"

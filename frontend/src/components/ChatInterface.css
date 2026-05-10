@@ -258,10 +258,30 @@
   color: #fff;
 }
 
-.mode-warn {
-  margin-left: 4px;
-  font-size: 10px;
-  opacity: 0.85;
+.mode-btn-warn {
+  border-color: #e6a817;
+  color: #e6a817;
+}
+
+.mode-btn-warn:hover {
+  border-color: #e6a817;
+  color: #e6a817;
+}
+
+.mode-warning {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #b07800;
+  background: #fff8e1;
+  border: 1px solid #f0d060;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+[data-theme='dark'] .mode-warning {
+  color: #ffd54f;
+  background: #2a2000;
+  border-color: #5a4500;
 }
 
 .system-prompt-input {
