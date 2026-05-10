@@ -92,4 +92,5 @@ Then open http://localhost:5173 in your browser.
 
 ## Credits
 
+This project is hosted at [paolosereno/multi-llm-council](https://github.com/paolosereno/multi-llm-council).
 Based on [karpathy/llm-council](https://github.com/karpathy/llm-council) by Andrej Karpathy.
