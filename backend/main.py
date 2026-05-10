@@ -178,6 +178,61 @@ async def reset_stats():
     return {"reset_at": reset_at}
 
 
+@app.get("/api/metrics")
+async def get_metrics():
+    """Aggregate latency and token metrics across stored conversations."""
+    from collections import defaultdict
+
+    reset_at = _get_stats_reset_at()
+    storage.ensure_data_dir()
+
+    model_data = defaultdict(lambda: {'latencies': [], 'prompt_tokens': [], 'completion_tokens': []})
+    total_runs = 0
+
+    for filename in os.listdir(storage.DATA_DIR):
+        if not filename.endswith('.json'):
+            continue
+        conv = storage.get_conversation(filename[:-5])
+        if conv is None:
+            continue
+        if reset_at and conv.get("created_at", "") < reset_at:
+            continue
+
+        for msg in conv.get('messages', []):
+            if msg.get('role') != 'assistant':
+                continue
+            stage1 = msg.get('stage1') or []
+            if not stage1 or not any(r.get('latency_ms') is not None for r in stage1):
+                continue
+
+            total_runs += 1
+            for result in stage1:
+                model = result['model']
+                if result.get('latency_ms') is not None:
+                    model_data[model]['latencies'].append(result['latency_ms'])
+                if result.get('prompt_tokens') is not None:
+                    model_data[model]['prompt_tokens'].append(result['prompt_tokens'])
+                if result.get('completion_tokens') is not None:
+                    model_data[model]['completion_tokens'].append(result['completion_tokens'])
+
+    by_model = []
+    for model, d in model_data.items():
+        entry = {
+            'model': model,
+            'short_name': model.split('/')[-1],
+            'sample_count': len(d['latencies']),
+        }
+        if d['latencies']:
+            entry['avg_latency_ms'] = round(sum(d['latencies']) / len(d['latencies']))
+        if d['prompt_tokens']:
+            entry['avg_prompt_tokens'] = round(sum(d['prompt_tokens']) / len(d['prompt_tokens']))
+            entry['avg_completion_tokens'] = round(sum(d['completion_tokens']) / len(d['completion_tokens']))
+        by_model.append(entry)
+
+    by_model.sort(key=lambda x: x.get('avg_latency_ms', 0))
+    return {'by_model': by_model, 'total_runs': total_runs}
+
+
 @app.get("/api/config")
 async def get_config():
     """Get current council configuration."""

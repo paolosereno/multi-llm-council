@@ -283,6 +283,7 @@ function App() {
       <Sidebar
         conversations={conversations}
         currentConversationId={currentConversationId}
+        currentConversation={currentConversation}
         onSelectConversation={handleSelectConversation}
         onNewConversation={handleNewConversation}
         onDeleteConversation={handleDeleteConversation}

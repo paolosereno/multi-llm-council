@@ -33,7 +33,10 @@ async def stage1_collect_responses(
         if response is not None:
             stage1_results.append({
                 "model": model,
-                "response": response.get('content', '')
+                "response": response.get('content', ''),
+                "latency_ms": response.get('latency_ms'),
+                "prompt_tokens": response.get('prompt_tokens'),
+                "completion_tokens": response.get('completion_tokens'),
             })
 
     return stage1_results
@@ -102,7 +105,10 @@ Now provide your evaluation and ranking:"""
             stage2_results.append({
                 "model": model,
                 "ranking": full_text,
-                "parsed_ranking": parsed
+                "parsed_ranking": parsed,
+                "latency_ms": response.get('latency_ms'),
+                "prompt_tokens": response.get('prompt_tokens'),
+                "completion_tokens": response.get('completion_tokens'),
             })
 
     return stage2_results, label_to_model
@@ -156,7 +162,10 @@ Provide a clear, well-reasoned final answer that represents the council's collec
 
     return {
         "model": chairman_model,
-        "response": response.get('content', '')
+        "response": response.get('content', ''),
+        "latency_ms": response.get('latency_ms'),
+        "prompt_tokens": response.get('prompt_tokens'),
+        "completion_tokens": response.get('completion_tokens'),
     }
 
 

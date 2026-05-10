@@ -2,11 +2,13 @@ import { useState } from 'react';
 import SettingsModal from './SettingsModal';
 import StatsModal from './StatsModal';
 import HelpModal from './HelpModal';
+import MetricsModal from './MetricsModal';
 import './Sidebar.css';
 
 export default function Sidebar({
   conversations,
   currentConversationId,
+  currentConversation,
   onSelectConversation,
   onNewConversation,
   onDeleteConversation,
@@ -16,6 +18,7 @@ export default function Sidebar({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [metricsOpen, setMetricsOpen] = useState(false);
   const [search, setSearch] = useState('');
 
   const filteredConversations = search.trim()
@@ -29,6 +32,13 @@ export default function Sidebar({
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
       {statsOpen && <StatsModal onClose={() => setStatsOpen(false)} />}
       {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
+      {metricsOpen && (
+        <MetricsModal
+          onClose={() => setMetricsOpen(false)}
+          currentConversation={currentConversation}
+          theme={theme}
+        />
+      )}}
       <div className="sidebar-header">
         <div className="sidebar-header-top">
           <h1>LLM Council</h1>
@@ -38,6 +48,9 @@ export default function Sidebar({
             </button>
             <button className="theme-toggle-btn" onClick={() => setStatsOpen(true)} title="Model statistics">
               ▤
+            </button>
+            <button className="theme-toggle-btn" onClick={() => setMetricsOpen(true)} title="Performance metrics">
+              ⌇
             </button>
             <button className="theme-toggle-btn" onClick={() => setHelpOpen(true)} title="Help">
               ?

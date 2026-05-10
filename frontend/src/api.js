@@ -55,6 +55,12 @@ export const api = {
     return response.json();
   },
 
+  async getMetrics() {
+    const response = await fetch(`${API_BASE}/api/metrics`);
+    if (!response.ok) throw new Error('Failed to get metrics');
+    return response.json();
+  },
+
   async resetStats() {
     const response = await fetch(`${API_BASE}/api/stats/reset`, { method: 'POST' });
     if (!response.ok) throw new Error('Failed to reset stats');
