@@ -23,21 +23,21 @@ function StageChart({ title, latencyData, tokenData, tooltipStyle, textColor, gr
       <h3 className="metrics-section-title">{title}</h3>
       {latencyData.length > 0 && (
         <>
-          <p className="metrics-chart-label">Latenza (ms)</p>
+          <p className="metrics-chart-label">Latency (ms)</p>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={latencyData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
               <XAxis dataKey="model" tick={{ fill: textColor, fontSize: 12 }} />
               <YAxis tick={{ fill: textColor, fontSize: 12 }} unit="ms" width={56} />
               <Tooltip {...tooltipStyle} />
-              <Bar dataKey="Latenza (ms)" fill="#4a90e2" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Latency (ms)" fill="#4a90e2" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </>
       )}
       {tokenData.length > 0 && (
         <>
-          <p className="metrics-chart-label">Token (input + output)</p>
+          <p className="metrics-chart-label">Tokens (input + output)</p>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={tokenData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
@@ -88,35 +88,31 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
     labelStyle: { color: isDark ? '#e0e0e0' : '#333' },
   };
 
-  // Stage 1 chart data
   const s1LatencyData = lastAssistant?.stage1
     ?.filter((r) => r.latency_ms != null)
-    ?.map((r) => ({ model: shortName(r.model), 'Latenza (ms)': r.latency_ms })) ?? [];
+    ?.map((r) => ({ model: shortName(r.model), 'Latency (ms)': r.latency_ms })) ?? [];
 
   const s1TokenData = lastAssistant?.stage1
     ?.filter((r) => r.prompt_tokens != null)
     ?.map((r) => ({ model: shortName(r.model), 'Input': r.prompt_tokens, 'Output': r.completion_tokens })) ?? [];
 
-  // Stage 2 chart data
   const s2LatencyData = lastAssistant?.stage2
     ?.filter((r) => r.latency_ms != null)
-    ?.map((r) => ({ model: shortName(r.model), 'Latenza (ms)': r.latency_ms })) ?? [];
+    ?.map((r) => ({ model: shortName(r.model), 'Latency (ms)': r.latency_ms })) ?? [];
 
   const s2TokenData = lastAssistant?.stage2
     ?.filter((r) => r.prompt_tokens != null)
     ?.map((r) => ({ model: shortName(r.model), 'Input': r.prompt_tokens, 'Output': r.completion_tokens })) ?? [];
 
-  // Stage 3 (chairman)
   const s3 = lastAssistant?.stage3;
 
-  // Historical chart data
   const histLatencyData = historicalData?.by_model
     ?.filter((m) => m.avg_latency_ms != null)
-    ?.map((m) => ({ model: m.short_name, 'Latenza media (ms)': m.avg_latency_ms, _runs: m.sample_count })) ?? [];
+    ?.map((m) => ({ model: m.short_name, 'Avg latency (ms)': m.avg_latency_ms, _runs: m.sample_count })) ?? [];
 
   const histTokenData = historicalData?.by_model
     ?.filter((m) => m.avg_prompt_tokens != null)
-    ?.map((m) => ({ model: m.short_name, 'Input medio': m.avg_prompt_tokens, 'Output medio': m.avg_completion_tokens })) ?? [];
+    ?.map((m) => ({ model: m.short_name, 'Avg input': m.avg_prompt_tokens, 'Avg output': m.avg_completion_tokens })) ?? [];
 
   const histChairman = historicalData?.chairman?.[0];
 
@@ -124,16 +120,16 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content metrics-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Metriche</h2>
+          <h2>Metrics</h2>
           <button className="modal-close-btn" onClick={onClose}>×</button>
         </div>
 
         <div className="metrics-tabs">
           <button className={`metrics-tab${tab === 'current' ? ' active' : ''}`} onClick={() => setTab('current')}>
-            Ultima run
+            Latest run
           </button>
           <button className={`metrics-tab${tab === 'historical' ? ' active' : ''}`} onClick={() => setTab('historical')}>
-            Storico
+            Historical
           </button>
         </div>
 
@@ -142,12 +138,12 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
           {tab === 'current' && (
             !hasCurrentData ? (
               <div className="metrics-empty">
-                Nessun dato disponibile. Invia una domanda al council per vedere le metriche.
+                No data available. Send a query to the council to see real-time metrics.
               </div>
             ) : (
               <>
                 <StageChart
-                  title="Stage 1 — Prime opinioni"
+                  title="Stage 1 — Individual responses"
                   latencyData={s1LatencyData}
                   tokenData={s1TokenData}
                   tooltipStyle={tooltipStyle}
@@ -156,7 +152,7 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
                 />
 
                 <StageChart
-                  title="Stage 2 — Revisione tra pari"
+                  title="Stage 2 — Peer review"
                   latencyData={s2LatencyData}
                   tokenData={s2TokenData}
                   tooltipStyle={tooltipStyle}
@@ -170,11 +166,11 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
                     {s3?.model && <span className="metrics-model-name"> ({shortName(s3.model)})</span>}
                   </h3>
                   <div className="metrics-stat-row">
-                    <StatBox label="Latenza" value={s3?.latency_ms} unit=" ms" />
-                    <StatBox label="Token input" value={s3?.prompt_tokens} />
-                    <StatBox label="Token output" value={s3?.completion_tokens} />
+                    <StatBox label="Latency" value={s3?.latency_ms} unit=" ms" />
+                    <StatBox label="Input tokens" value={s3?.prompt_tokens} />
+                    <StatBox label="Output tokens" value={s3?.completion_tokens} />
                     {s3?.prompt_tokens != null && s3?.completion_tokens != null && (
-                      <StatBox label="Token totali" value={s3.prompt_tokens + s3.completion_tokens} />
+                      <StatBox label="Total tokens" value={s3.prompt_tokens + s3.completion_tokens} />
                     )}
                   </div>
                 </section>
@@ -184,22 +180,22 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
 
           {tab === 'historical' && (
             loadingHist ? (
-              <div className="modal-loading">Caricamento...</div>
+              <div className="modal-loading">Loading...</div>
             ) : !historicalData ? (
-              <div className="metrics-empty">Errore nel caricamento dei dati.</div>
+              <div className="metrics-empty">Failed to load data.</div>
             ) : historicalData.total_runs === 0 ? (
               <div className="metrics-empty">
-                Nessun dato storico disponibile. Le metriche vengono salvate a partire dalla prossima run.
+                No historical data yet. Metrics are recorded starting from the next run.
               </div>
             ) : (
               <>
                 <p className="metrics-total">
-                  Basato su <strong>{historicalData.total_runs}</strong> run con metriche disponibili
+                  Based on <strong>{historicalData.total_runs}</strong> runs with metrics available
                 </p>
 
                 {histLatencyData.length > 0 && (
                   <section className="metrics-section">
-                    <h3 className="metrics-section-title">Stage 1 — Latenza media per modello</h3>
+                    <h3 className="metrics-section-title">Stage 1 — Average latency per model</h3>
                     <ResponsiveContainer width="100%" height={190}>
                       <BarChart data={histLatencyData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
@@ -207,9 +203,9 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
                         <YAxis tick={{ fill: textColor, fontSize: 12 }} unit="ms" width={56} />
                         <Tooltip
                           {...tooltipStyle}
-                          formatter={(v, _n, props) => [`${v} ms (n=${props.payload._runs})`, 'Latenza media']}
+                          formatter={(v, _n, props) => [`${v} ms (n=${props.payload._runs})`, 'Avg latency']}
                         />
-                        <Bar dataKey="Latenza media (ms)" fill="#4a90e2" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="Avg latency (ms)" fill="#4a90e2" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </section>
@@ -217,7 +213,7 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
 
                 {histTokenData.length > 0 && (
                   <section className="metrics-section">
-                    <h3 className="metrics-section-title">Stage 1 — Token medi per modello</h3>
+                    <h3 className="metrics-section-title">Stage 1 — Average tokens per model</h3>
                     <ResponsiveContainer width="100%" height={190}>
                       <BarChart data={histTokenData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
@@ -225,8 +221,8 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
                         <YAxis tick={{ fill: textColor, fontSize: 12 }} width={56} />
                         <Tooltip {...tooltipStyle} />
                         <Legend wrapperStyle={{ fontSize: 12, color: textColor }} />
-                        <Bar dataKey="Input medio" fill="#4a90e2" stackId="t" />
-                        <Bar dataKey="Output medio" fill="#82ca9d" stackId="t" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="Avg input" fill="#4a90e2" stackId="t" />
+                        <Bar dataKey="Avg output" fill="#82ca9d" stackId="t" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </section>
@@ -239,10 +235,10 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
                       <span className="metrics-model-name"> ({histChairman.short_name})</span>
                     </h3>
                     <div className="metrics-stat-row">
-                      <StatBox label="Latenza media" value={histChairman.avg_latency_ms} unit=" ms" />
-                      <StatBox label="Input medio" value={histChairman.avg_prompt_tokens} />
-                      <StatBox label="Output medio" value={histChairman.avg_completion_tokens} />
-                      <StatBox label="Campioni" value={histChairman.sample_count} />
+                      <StatBox label="Avg latency" value={histChairman.avg_latency_ms} unit=" ms" />
+                      <StatBox label="Avg input tokens" value={histChairman.avg_prompt_tokens} />
+                      <StatBox label="Avg output tokens" value={histChairman.avg_completion_tokens} />
+                      <StatBox label="Samples" value={histChairman.sample_count} />
                     </div>
                   </section>
                 )}
@@ -252,7 +248,7 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
         </div>
 
         <div className="modal-footer">
-          <button className="modal-cancel-btn" onClick={onClose}>Chiudi</button>
+          <button className="modal-cancel-btn" onClick={onClose}>Close</button>
         </div>
       </div>
     </div>
