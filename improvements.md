@@ -40,10 +40,11 @@ Campo opzionale per fornire contesto al council prima della domanda.
 
 ## Bassa Priorità
 
-### 7. Ricerca nelle conversazioni
-Filtro testuale nella sidebar per trovare rapidamente conversazioni passate per titolo o contenuto.
+### 7. Ricerca nelle conversazioni ✅ IMPLEMENTATO
+Campo di ricerca nella sidebar, filtra in tempo reale per titolo. Mostra "No results" se nessuna conversazione corrisponde.
 
-### 8. Statistiche modelli
-Tracciare nel tempo quali modelli vengono più spesso premiati nei ranking di Stage 2.
-- Dashboard con punteggi aggregati storici
-- Grafici di performance per modello
+### 8. Statistiche modelli ✅ IMPLEMENTATO
+Pulsante ▤ nella sidebar apre un modal con la tabella delle performance storiche per modello.
+- Colonne: Runs, Avg Rank, Wins, Win Rate
+- Calcolate su tutte le conversazioni salvate ricostruendo il mapping label→model dai dati stage1
+- Il modello in testa è evidenziato
