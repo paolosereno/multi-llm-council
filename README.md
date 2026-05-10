@@ -34,13 +34,13 @@ cd ..
 
 ### 2. Configure API Key
 
-Create a `.env` file in the project root:
+Copy the example file and add your key:
 
 ```bash
-OPENROUTER_API_KEY=sk-or-v1-...
+cp .env.example .env
 ```
 
-Get your API key at [openrouter.ai](https://openrouter.ai/). Make sure to purchase the credits you need, or sign up for automatic top up.
+Then edit `.env` and replace the placeholder with your actual key. Get your API key at [openrouter.ai](https://openrouter.ai/). Make sure to purchase the credits you need, or sign up for automatic top up.
 
 ### 3. Configure Models (Optional)
 
