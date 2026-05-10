@@ -44,18 +44,7 @@ Get your API key at [openrouter.ai](https://openrouter.ai/). Make sure to purcha
 
 ### 3. Configure Models (Optional)
 
-Edit `backend/config.py` to customize the council:
-
-```python
-COUNCIL_MODELS = [
-    "openai/gpt-5.1",
-    "google/gemini-3-pro-preview",
-    "anthropic/claude-sonnet-4.5",
-    "x-ai/grok-4",
-]
-
-CHAIRMAN_MODEL = "google/gemini-3-pro-preview"
-```
+The default models are set in `backend/config.py`, but you can change them at any time from the **Settings** panel (⚙ icon) in the app's sidebar — no restart required.
 
 ## Running the Application
 
@@ -78,6 +67,20 @@ npm run dev
 ```
 
 Then open http://localhost:5173 in your browser.
+
+## Features
+
+- **Multi-model deliberation** — Stage 1 collects parallel responses, Stage 2 cross-ranks them anonymously, Stage 3 synthesizes the final answer.
+- **Collapsible stages** — Stage 1 and 3 start expanded; Stage 2 (peer reviews) starts collapsed to keep the view clean.
+- **Multi-turn conversations** — An optional "Include context" toggle passes the conversation history to all three stages so follow-up questions work naturally.
+- **System prompt** — An optional system prompt field lets you give context or persona instructions that apply to all three stages.
+- **Re-run council** — A ↺ button on any completed response re-runs the full council on the same question, replacing the previous answer.
+- **Model configuration UI** — Change the council models and chairman directly from the ⚙ Settings panel; the change persists and takes effect immediately without a restart.
+- **Model statistics** — The ▤ icon opens a dashboard showing each model's average rank, win count, and win rate across all past council runs. Stats can be reset to start fresh.
+- **Light / dark theme** — Toggle with the ☾/☀ button in the sidebar header.
+- **Conversation search** — Filter the sidebar list in real time by title.
+- **Markdown export** — Export any conversation to a `.md` file.
+- **Delete conversations** — Remove individual conversations from the sidebar.
 
 ## Tech Stack
 
