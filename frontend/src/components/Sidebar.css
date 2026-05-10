@@ -50,6 +50,26 @@
   color: var(--text-primary);
 }
 
+.search-input {
+  width: 100%;
+  margin-top: 10px;
+  padding: 7px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-input:focus {
+  border-color: var(--primary);
+}
+
 .new-conversation-btn {
   width: 100%;
   padding: 10px;

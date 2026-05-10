@@ -12,6 +12,13 @@ export default function Sidebar({
   onToggleTheme,
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [search, setSearch] = useState('');
+
+  const filteredConversations = search.trim()
+    ? conversations.filter((c) =>
+        (c.title || 'New Conversation').toLowerCase().includes(search.toLowerCase())
+      )
+    : conversations;
 
   return (
     <div className="sidebar">
@@ -31,13 +38,22 @@ export default function Sidebar({
         <button className="new-conversation-btn" onClick={onNewConversation}>
           + New Conversation
         </button>
+        <input
+          className="search-input"
+          type="text"
+          placeholder="Search conversations..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
       <div className="conversation-list">
-        {conversations.length === 0 ? (
-          <div className="no-conversations">No conversations yet</div>
+        {filteredConversations.length === 0 ? (
+          <div className="no-conversations">
+            {search.trim() ? 'No results' : 'No conversations yet'}
+          </div>
         ) : (
-          conversations.map((conv) => (
+          filteredConversations.map((conv) => (
             <div
               key={conv.id}
               className={`conversation-item ${
