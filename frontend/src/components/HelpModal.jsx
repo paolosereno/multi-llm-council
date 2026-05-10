@@ -80,11 +80,15 @@ const sections = [
     icon: '⚙',
     title: 'Model configuration',
     content: (
-      <p>
-        Click <strong>⚙</strong> in the sidebar to open Settings. You can add or remove council
-        models and change the Chairman by entering an OpenRouter model identifier
-        (e.g. <code>openai/gpt-4.1</code>). Changes take effect immediately without restarting the server.
-      </p>
+      <>
+        <p>
+          Click <strong>⚙</strong> in the sidebar to open Settings. Type a name or keyword in the
+          search field to find models — a dropdown shows matching results with name, identifier, and
+          pricing (input / output cost per 1M tokens, or <code>free</code>). Select a model to add
+          it to the council, or press <kbd>Enter</kbd> to add an identifier typed manually.
+          Changes take effect immediately without restarting the server.
+        </p>
+      </>
     ),
   },
   {

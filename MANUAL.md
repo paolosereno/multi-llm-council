@@ -1,4 +1,4 @@
-# LLM Council — User Manual
+# Multi LLM Council — User Manual
 
 ## Table of Contents
 
@@ -67,9 +67,14 @@ Click the **↺** button in the header of any completed response to re-run the c
 
 ## ⚙ Model configuration
 
-Click **⚙** in the sidebar to open Settings. You can add or remove council models and change the Chairman by entering an OpenRouter model identifier (e.g. `openai/gpt-4.1`). Changes take effect immediately without restarting the server.
+Click **⚙** in the sidebar to open Settings. You can add or remove council models and change the Chairman model.
 
-The full list of available models is at [openrouter.ai/models](https://openrouter.ai/models).
+To add a model, start typing a name or keyword in the search field — a dropdown appears with matching models fetched live from OpenRouter. Each entry shows:
+- the model name
+- the model identifier (e.g. `openai/gpt-4.1`)
+- the price per 1M input and output tokens (or `free` for free models)
+
+Select a model from the dropdown to add it, or press **Enter** to add the identifier you typed manually. Changes take effect immediately without restarting the server.
 
 ---
 
