@@ -78,6 +78,82 @@ function App() {
     }
   };
 
+  const handleRerun = async (content, systemPrompt, targetIndex) => {
+    if (!currentConversationId) return;
+    setIsLoading(true);
+
+    setCurrentConversation((prev) => {
+      const messages = [...prev.messages];
+      messages[targetIndex] = {
+        role: 'assistant',
+        stage1: null, stage2: null, stage3: null, metadata: null,
+        loading: { stage1: false, stage2: false, stage3: false },
+      };
+      return { ...prev, messages };
+    });
+
+    try {
+      await api.rerunStream(currentConversationId, content, systemPrompt, (eventType, event) => {
+        switch (eventType) {
+          case 'stage1_start':
+            setCurrentConversation((prev) => {
+              const messages = [...prev.messages];
+              messages[targetIndex] = { ...messages[targetIndex], loading: { ...messages[targetIndex].loading, stage1: true } };
+              return { ...prev, messages };
+            });
+            break;
+          case 'stage1_complete':
+            setCurrentConversation((prev) => {
+              const messages = [...prev.messages];
+              messages[targetIndex] = { ...messages[targetIndex], stage1: event.data, loading: { ...messages[targetIndex].loading, stage1: false } };
+              return { ...prev, messages };
+            });
+            break;
+          case 'stage2_start':
+            setCurrentConversation((prev) => {
+              const messages = [...prev.messages];
+              messages[targetIndex] = { ...messages[targetIndex], loading: { ...messages[targetIndex].loading, stage2: true } };
+              return { ...prev, messages };
+            });
+            break;
+          case 'stage2_complete':
+            setCurrentConversation((prev) => {
+              const messages = [...prev.messages];
+              messages[targetIndex] = { ...messages[targetIndex], stage2: event.data, metadata: event.metadata, loading: { ...messages[targetIndex].loading, stage2: false } };
+              return { ...prev, messages };
+            });
+            break;
+          case 'stage3_start':
+            setCurrentConversation((prev) => {
+              const messages = [...prev.messages];
+              messages[targetIndex] = { ...messages[targetIndex], loading: { ...messages[targetIndex].loading, stage3: true } };
+              return { ...prev, messages };
+            });
+            break;
+          case 'stage3_complete':
+            setCurrentConversation((prev) => {
+              const messages = [...prev.messages];
+              messages[targetIndex] = { ...messages[targetIndex], stage3: event.data, loading: { ...messages[targetIndex].loading, stage3: false } };
+              return { ...prev, messages };
+            });
+            break;
+          case 'complete':
+            setIsLoading(false);
+            break;
+          case 'error':
+            console.error('Re-run error:', event.message);
+            setIsLoading(false);
+            break;
+          default:
+            break;
+        }
+      });
+    } catch (error) {
+      console.error('Failed to re-run:', error);
+      setIsLoading(false);
+    }
+  };
+
   const handleSendMessage = async (content, systemPrompt = null) => {
     if (!currentConversationId) return;
 
@@ -216,6 +292,7 @@ function App() {
       <ChatInterface
         conversation={currentConversation}
         onSendMessage={handleSendMessage}
+        onRerun={handleRerun}
         isLoading={isLoading}
       />
     </div>

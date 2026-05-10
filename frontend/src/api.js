@@ -109,6 +109,41 @@ export const api = {
    * @param {function} onEvent - Callback function for each event: (eventType, data) => void
    * @returns {Promise<void>}
    */
+  async rerunStream(conversationId, content, systemPrompt, onEvent) {
+    const body = { content };
+    if (systemPrompt) body.system_prompt = systemPrompt;
+
+    const response = await fetch(
+      `${API_BASE}/api/conversations/${conversationId}/message/rerun`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (!response.ok) throw new Error('Failed to re-run council');
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value);
+      for (const line of chunk.split('\n')) {
+        if (line.startsWith('data: ')) {
+          try {
+            const event = JSON.parse(line.slice(6));
+            onEvent(event.type, event);
+          } catch (e) {
+            console.error('Failed to parse SSE event:', e);
+          }
+        }
+      }
+    }
+  },
+
   async sendMessageStream(conversationId, content, systemPrompt, onEvent) {
     const body = { content };
     if (systemPrompt) body.system_prompt = systemPrompt;

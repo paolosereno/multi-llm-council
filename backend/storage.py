@@ -107,22 +107,18 @@ def list_conversations() -> List[Dict[str, Any]]:
     return conversations
 
 
-def add_user_message(conversation_id: str, content: str):
+def add_user_message(conversation_id: str, content: str, system_prompt: str = None):
     """
     Add a user message to a conversation.
-
-    Args:
-        conversation_id: Conversation identifier
-        content: User message content
     """
     conversation = get_conversation(conversation_id)
     if conversation is None:
         raise ValueError(f"Conversation {conversation_id} not found")
 
-    conversation["messages"].append({
-        "role": "user",
-        "content": content
-    })
+    msg = {"role": "user", "content": content}
+    if system_prompt:
+        msg["system_prompt"] = system_prompt
+    conversation["messages"].append(msg)
 
     save_conversation(conversation)
 
@@ -154,6 +150,31 @@ def add_assistant_message(
     })
 
     save_conversation(conversation)
+
+
+def replace_last_assistant_message(
+    conversation_id: str,
+    stage1: List[Dict[str, Any]],
+    stage2: List[Dict[str, Any]],
+    stage3: Dict[str, Any]
+):
+    """Replace the last assistant message in a conversation (used for re-run)."""
+    conversation = get_conversation(conversation_id)
+    if conversation is None:
+        raise ValueError(f"Conversation {conversation_id} not found")
+
+    for i in range(len(conversation["messages"]) - 1, -1, -1):
+        if conversation["messages"][i]["role"] == "assistant":
+            conversation["messages"][i] = {
+                "role": "assistant",
+                "stage1": stage1,
+                "stage2": stage2,
+                "stage3": stage3,
+            }
+            save_conversation(conversation)
+            return
+
+    raise ValueError("No assistant message found to replace")
 
 
 def delete_conversation(conversation_id: str) -> bool:

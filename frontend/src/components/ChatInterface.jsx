@@ -61,6 +61,7 @@ function buildMarkdown(conversation) {
 export default function ChatInterface({
   conversation,
   onSendMessage,
+  onRerun,
   isLoading,
 }) {
   const [input, setInput] = useState('');
@@ -151,7 +152,21 @@ export default function ChatInterface({
                 </div>
               ) : (
                 <div className="assistant-message">
-                  <div className="message-label">LLM Council</div>
+                  <div className="assistant-message-header">
+                    <div className="message-label">LLM Council</div>
+                    {msg.stage3 && !msg.loading?.stage3 && (
+                      <button
+                        className="rerun-btn"
+                        disabled={isLoading}
+                        onClick={() => {
+                          const userMsg = index > 0 ? conversation.messages[index - 1] : null;
+                          onRerun(userMsg?.content, userMsg?.system_prompt || null, index);
+                        }}
+                      >
+                        ↺ Re-run
+                      </button>
+                    )}
+                  </div>
 
                   {/* Stage 1 */}
                   {msg.loading?.stage1 && (
