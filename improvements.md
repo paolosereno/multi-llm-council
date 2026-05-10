@@ -8,10 +8,10 @@ Pannello impostazioni per cambiare council e chairman senza modificare `config.p
 - Cambiare il chairman
 - Persistere la configurazione (backend JSON + runtime in memoria)
 
-### 2. Conversazione multi-turno
-Attualmente ogni domanda è indipendente. Passare la history ai modelli renderebbe l'app molto più potente per approfondimenti e follow-up.
-- Includere i messaggi precedenti nel contesto inviato ai modelli
-- Gestire il troncamento della history per rispettare i limiti di contesto
+### 2. Conversazione multi-turno ✅ IMPLEMENTATO
+Toggle "Include context" nel form (default off). Quando attivo, passa la history (domande + risposte Stage 3) a tutti e tre gli stage del council.
+- Il form è sempre visibile per permettere follow-up
+- Il toggle appare solo dopo il primo messaggio
 
 ### 3. Collassa/espandi stages ✅ IMPLEMENTATO
 Stage 1 e 2 producono molto testo. Toggle collassa/espandi su ogni stage.
