@@ -125,6 +125,18 @@ const sections = [
     ),
   },
   {
+    icon: '⊟',
+    title: 'Model catalogue',
+    content: (
+      <p>
+        Click <strong>⊟</strong> in the sidebar to open the full OpenRouter model catalogue.
+        The table shows name, ID, context window, and input/output pricing per 1M tokens for every
+        available model. Click any column header to sort, use the search field to filter by name
+        or ID. Click <strong>← Back to chat</strong> or <strong>⊟</strong> again to return.
+      </p>
+    ),
+  },
+  {
     icon: '▤',
     title: 'Model statistics',
     content: (

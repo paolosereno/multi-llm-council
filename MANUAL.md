@@ -106,6 +106,22 @@ Select a model from the dropdown to add it, or press **Enter** to add the identi
 
 ---
 
+## ⊟ Model catalogue
+
+Click **⊟** in the sidebar to open the full OpenRouter model catalogue. The page replaces the chat area and shows a sortable, searchable table with:
+
+| Column | Content |
+|--------|---------|
+| **Name** | Model display name and (where available) a brief description |
+| **ID** | OpenRouter model identifier (e.g. `openai/gpt-4.1`) |
+| **Context** | Maximum context window (e.g. 128K, 1M) |
+| **Input $/1M** | Cost per 1 million input tokens |
+| **Output $/1M** | Cost per 1 million output tokens |
+
+Click any column header to sort; click again to reverse the order. Use the search field to filter by name or ID in real time. Click **← Back to chat** or the **⊟** button again to return to the conversation.
+
+---
+
 ## ▤ Model statistics
 
 Click **▤** to view each model's historical performance across all stored council runs:

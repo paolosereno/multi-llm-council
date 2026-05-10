@@ -32,6 +32,8 @@ This is a fork of [karpathy/llm-council](https://github.com/karpathy/llm-council
 
 ![Screenshot 4](screenshot4.jpg)
 
+![Screenshot 5](screenshot5.jpg)
+
 ## Setup
 
 ### 1. Install Dependencies
@@ -95,6 +97,7 @@ Then open http://localhost:5173 in your browser.
 - **Re-run council** — A ↺ button on any completed response re-runs the full council on the same question, replacing the previous answer.
 - **Execution modes** — Choose between Normal, Fast, Budget, and Hybrid mode before sending a message. Each mode selects a different model list for Stage 1 and Stage 2 (configurable in Settings). Hybrid uses Council models for Stage 1 and Budget models for Stage 2. Stage 3 always uses the Chairman.
 - **Model configuration UI** — Change the council models and chairman directly from the ⚙ Settings panel; the change persists and takes effect immediately without a restart. Separate model lists can be configured for Fast and Budget modes. A searchable dropdown fetches the full OpenRouter model catalogue and shows name, ID, and pricing (input/output cost per 1M tokens) for each model.
+- **Model catalogue** — A full-page view (⊟ button in the sidebar) shows the complete OpenRouter model list with name, ID, context window, and input/output pricing. The table is sortable by any column and filterable in real time by name or ID.
 - **Timeout and error handling** — Each model call has a 60-second timeout; each stage has a 90-second overall cap. If a stage times out or the connection drops, an inline error banner appears in the chat and loading spinners are cleared automatically.
 - **Model statistics** — The ▤ icon opens a dashboard showing each model's average rank, win count, and win rate across all past council runs. Stats can be reset to start fresh.
 - **Performance metrics** — The ~ icon opens a metrics dashboard with latency, token usage, and cost per model for the latest run and aggregated historical averages (powered by Recharts).
