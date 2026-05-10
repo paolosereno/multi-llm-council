@@ -223,7 +223,7 @@
 }
 
 .context-toggle:disabled {
-  opacity: 0.35;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
