@@ -16,11 +16,13 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 - Runtime config also stores `fast_models` and `budget_models` (default: empty lists)
 - `get_runtime_config()`: loads from `data/council_config.json`, adds missing keys with `setdefault`
 - `update_runtime_config()`: accepts `council_models`, `chairman_model`, `fast_models`, `budget_models`
+- `MODEL_TIMEOUT = 60`: httpx timeout (seconds) per individual model request in `query_model()`
+- `STAGE_TIMEOUT = 90`: `asyncio.wait_for` safety cap (seconds) per stage in the streaming endpoints
 - Uses environment variable `OPENROUTER_API_KEY` from `.env`
 - Backend runs on **port 8001** (NOT 8000 - user had another app on 8000)
 
 **`openrouter.py`**
-- `query_model()`: Single async model query
+- `query_model()`: Single async model query; default `timeout` parameter uses `MODEL_TIMEOUT` (60s) from config
 - `query_models_parallel()`: Parallel queries using `asyncio.gather()`
 - Returns dict with `content`, `latency_ms`, `prompt_tokens`, `completion_tokens`, `cost` on success
 - On failure returns `{'error': str(e)}` (never `None`) so callers can distinguish error from empty response
@@ -59,6 +61,7 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 - `GET /api/stats`: aggregate model performance statistics
 - `GET /api/metrics`: latency, token usage, cost per model (Stage 1 and Stage 3)
 - Streaming endpoints pass `execution_mode` to `stage1_collect_responses` and `stage2_collect_rankings`
+- Each stage call in both streaming endpoints is wrapped with `asyncio.wait_for(coro, timeout=STAGE_TIMEOUT)`; on `asyncio.TimeoutError` a specific error message is yielded and the generator returns, closing the stream gracefully
 
 ### Frontend Structure (`frontend/src/`)
 
@@ -66,13 +69,15 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 - Main orchestration: manages conversations list and current conversation
 - Handles message sending and metadata storage
 - `handleSendMessage(content, systemPrompt, history, executionMode)`: passes executionMode to API
-- `handleRerun(content, systemPrompt, targetIndex, executionMode)`: passes executionMode to API
+- `handleRerun(content, systemPrompt, targetIndex, executionMode)`: passes executionMode to API; uses the **currently selected** executionMode in the UI, not the one from the original run
+- `error` event handler in both functions: clears all `loading` flags in the assistant message and sets `streamError` to the error message string; `setIsLoading(false)`
 - Important: metadata is stored in the UI state for display but not persisted to backend JSON
 
 **`api.js`**
 - `sendMessageStream(conversationId, content, systemPrompt, history, executionMode, onEvent)`
 - `rerunStream(conversationId, content, systemPrompt, executionMode, onEvent)`
 - `getModels()`: calls `GET /api/models` to fetch OpenRouter model catalogue
+- Both stream functions track a `streamEnded` flag; if the reader loop exits without a `complete` or `error` event (e.g. backend crash), they fire a synthetic `error` event with "Connection closed unexpectedly."
 
 **`components/ChatInterface.jsx`**
 - Multiline textarea (3 rows, resizable), max 10,000 characters enforced client-side
@@ -81,6 +86,7 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 - Execution mode selector: Normal / Fast / Budget / Hybrid buttons
 - Fetches config on mount to detect empty fast_models / budget_models; active mode button turns orange and an inline warning message appears below the selector when the relevant list is empty
 - executionMode state is local to ChatInterface, passed in `onSendMessage` and `onRerun` calls
+- Renders `.stream-error` banner (red, dark-mode aware) below Stage 3 when `msg.streamError` is set
 
 **`components/SettingsModal.jsx`**
 - Four model list sections: Council Models, Fast Models, Budget Models, Chairman Model
@@ -181,7 +187,7 @@ Runtime config is saved to `data/council_config.json`. The file includes all fou
 - Collapsible stages in UI
 - Multi-turn conversations with optional context toggle
 - System prompt field
-- Re-run council on same question
+- Re-run council on same question (uses currently selected execution mode)
 - Execution modes: Normal / Fast / Budget / Hybrid
 - Model configuration UI with searchable OpenRouter dropdown (name + pricing)
 - Separate model lists for Council, Fast, Budget modes
@@ -190,6 +196,8 @@ Runtime config is saved to `data/council_config.json`. The file includes all fou
 - Real cost tracking from OpenRouter `usage.cost`
 - Light / dark theme
 - Conversation search, delete, Markdown export
+- Per-model timeout (60s via httpx) and per-stage timeout (90s via asyncio.wait_for)
+- Stream error display: inline banner in chat when a stage times out or the stream closes unexpectedly
 
 ## Data Flow Summary
 

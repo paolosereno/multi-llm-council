@@ -30,6 +30,8 @@ Each stage is shown in the chat as a collapsible section. Stage 1 and Stage 3 st
 
 If a model fails to respond, its tab in Stage 1 is shown in red with a ⚠ indicator. The error detail is visible in the tab content. Failed models are automatically excluded from Stage 2 ranking.
 
+Each model has a **60-second timeout** per request. Each stage has a **90-second overall timeout**: if all models together have not completed within 90 seconds, the stage is aborted and an error banner appears in the chat. The remaining stages are skipped.
+
 ---
 
 ## ⌨️ Sending a message
