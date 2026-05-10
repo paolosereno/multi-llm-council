@@ -25,10 +25,10 @@ Stage 1 e 2 producono molto testo. Toggle collassa/espandi su ogni stage.
 ### 4. Copia risposta
 Pulsante per copiare negli appunti il testo di un singolo tab (Stage 1) o la risposta finale (Stage 3), senza dover esportare l'intero file.
 
-### 5. Riesegui council
-Possibilità di rieseguire la stessa domanda per confrontare esiti diversi, eventualmente con modelli diversi.
-- Pulsante "Re-run" su ogni risposta del council
-- Opzione per cambiare i modelli prima di rieseguire
+### 5. Riesegui council ✅ IMPLEMENTATO
+Pulsante ↺ Re-run su ogni risposta completata del council.
+- Riesegue il council sulla stessa domanda, sostituendo la risposta precedente
+- Il system prompt originale viene preservato e riutilizzato automaticamente
 
 ### 6. Prompt di sistema personalizzato ✅ IMPLEMENTATO
 Campo opzionale per fornire contesto al council prima della domanda.
