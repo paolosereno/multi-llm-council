@@ -2,6 +2,17 @@ import { useState, useEffect, useRef } from 'react';
 import { api } from '../api';
 import './SettingsModal.css';
 
+function formatPrice(pricing) {
+  const prompt = parseFloat(pricing?.prompt ?? 0);
+  const completion = parseFloat(pricing?.completion ?? 0);
+  if (!prompt && !completion) return 'free';
+  const fmt = (v) => {
+    const perM = v * 1_000_000;
+    return perM < 0.01 ? '<$0.01' : `$${perM.toFixed(2)}`;
+  };
+  return `in ${fmt(prompt)} / out ${fmt(completion)} per 1M`;
+}
+
 function ModelComboBox({ availableModels, value, onChange, onSelect, placeholder, className }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
@@ -55,6 +66,7 @@ function ModelComboBox({ availableModels, value, onChange, onSelect, placeholder
             >
               <span className="model-dropdown-name">{m.name}</span>
               <span className="model-dropdown-id">{m.id}</span>
+              <span className="model-dropdown-price">{formatPrice(m.pricing)}</span>
             </li>
           ))}
         </ul>

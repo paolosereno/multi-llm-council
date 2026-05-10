@@ -169,6 +169,11 @@
   font-family: monospace;
 }
 
+.model-dropdown-price {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
 .model-add-row {
   display: flex;
   gap: 8px;
