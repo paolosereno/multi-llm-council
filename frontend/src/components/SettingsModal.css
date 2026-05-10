@@ -115,6 +115,59 @@
   background: var(--danger-bg);
 }
 
+.model-combobox {
+  position: relative;
+}
+
+.model-add-row .model-combobox {
+  flex: 1;
+}
+
+.settings-section > .model-combobox {
+  width: 100%;
+}
+
+.model-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-app);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  z-index: 200;
+  max-height: 220px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.model-dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.model-dropdown-item:hover {
+  background: var(--bg-hover);
+}
+
+.model-dropdown-name {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.model-dropdown-id {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
 .model-add-row {
   display: flex;
   gap: 8px;

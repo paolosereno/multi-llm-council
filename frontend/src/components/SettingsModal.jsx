@@ -1,11 +1,73 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '../api';
 import './SettingsModal.css';
+
+function ModelComboBox({ availableModels, value, onChange, onSelect, placeholder, className }) {
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef(null);
+
+  const results = value.length > 0
+    ? availableModels
+        .filter(m =>
+          m.id.toLowerCase().includes(value.toLowerCase()) ||
+          m.name.toLowerCase().includes(value.toLowerCase())
+        )
+        .slice(0, 25)
+    : [];
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const commit = (id) => {
+    if (onSelect) onSelect(id);
+    else onChange(id);
+    setOpen(false);
+  };
+
+  return (
+    <div className="model-combobox" ref={wrapperRef}>
+      <input
+        className={className}
+        type="text"
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => value && setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') { if (onSelect) onSelect(value); setOpen(false); }
+          if (e.key === 'Escape') setOpen(false);
+        }}
+      />
+      {open && results.length > 0 && (
+        <ul className="model-dropdown">
+          {results.map(m => (
+            <li
+              key={m.id}
+              className="model-dropdown-item"
+              onMouseDown={(e) => { e.preventDefault(); commit(m.id); }}
+            >
+              <span className="model-dropdown-name">{m.name}</span>
+              <span className="model-dropdown-id">{m.id}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default function SettingsModal({ onClose }) {
   const [councilModels, setCouncilModels] = useState([]);
   const [chairmanModel, setChairmanModel] = useState('');
   const [newModel, setNewModel] = useState('');
+  const [availableModels, setAvailableModels] = useState([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -15,10 +77,13 @@ export default function SettingsModal({ onClose }) {
       setChairmanModel(config.chairman_model);
       setLoading(false);
     });
+    api.getModels()
+      .then((data) => setAvailableModels(data.models || []))
+      .catch(() => {});
   }, []);
 
-  const handleAddModel = () => {
-    const trimmed = newModel.trim();
+  const handleAddModel = (id) => {
+    const trimmed = (typeof id === 'string' ? id : newModel).trim();
     if (trimmed && !councilModels.includes(trimmed)) {
       setCouncilModels([...councilModels, trimmed]);
       setNewModel('');
@@ -70,13 +135,13 @@ export default function SettingsModal({ onClose }) {
                 ))}
               </div>
               <div className="model-add-row">
-                <input
-                  className="model-add-input"
-                  type="text"
-                  placeholder="provider/model-name"
+                <ModelComboBox
+                  availableModels={availableModels}
                   value={newModel}
-                  onChange={(e) => setNewModel(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddModel()}
+                  onChange={setNewModel}
+                  onSelect={handleAddModel}
+                  placeholder="Search models…"
+                  className="model-add-input"
                 />
                 <button className="model-add-btn" onClick={handleAddModel}>
                   Add
@@ -86,12 +151,12 @@ export default function SettingsModal({ onClose }) {
 
             <section className="settings-section">
               <h3>Chairman Model</h3>
-              <input
-                className="chairman-input"
-                type="text"
+              <ModelComboBox
+                availableModels={availableModels}
                 value={chairmanModel}
-                onChange={(e) => setChairmanModel(e.target.value)}
+                onChange={setChairmanModel}
                 placeholder="provider/model-name"
+                className="chairman-input"
               />
             </section>
           </div>

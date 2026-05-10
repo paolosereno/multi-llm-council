@@ -70,6 +70,12 @@ export const api = {
   /**
    * Get council configuration.
    */
+  async getModels() {
+    const response = await fetch(`${API_BASE}/api/models`);
+    if (!response.ok) throw new Error('Failed to get models');
+    return response.json();
+  },
+
   async getConfig() {
     const response = await fetch(`${API_BASE}/api/config`);
     if (!response.ok) throw new Error('Failed to get config');

@@ -279,6 +279,33 @@ async def get_metrics():
     return {'by_model': by_model, 'chairman': chairman_stats, 'total_runs': total_runs}
 
 
+@app.get("/api/models")
+async def list_available_models():
+    """Fetch available models from OpenRouter and return a simplified list."""
+    import httpx
+    from .config import OPENROUTER_API_KEY
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            "https://openrouter.ai/api/v1/models",
+            headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
+            timeout=10.0,
+        )
+        if not resp.is_success:
+            raise HTTPException(status_code=502, detail="Failed to fetch models from OpenRouter")
+        data = resp.json()
+
+    models = [
+        {
+            "id": m["id"],
+            "name": m.get("name", m["id"]),
+        }
+        for m in data.get("data", [])
+    ]
+    models.sort(key=lambda x: x["name"].lower())
+    return {"models": models}
+
+
 @app.get("/api/config")
 async def get_config():
     """Get current council configuration."""
