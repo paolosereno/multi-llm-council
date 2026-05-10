@@ -7,11 +7,18 @@ export default function Sidebar({
   onSelectConversation,
   onNewConversation,
   onDeleteConversation,
+  theme,
+  onToggleTheme,
 }) {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <h1>LLM Council</h1>
+        <div className="sidebar-header-top">
+          <h1>LLM Council</h1>
+          <button className="theme-toggle-btn" onClick={onToggleTheme} title="Toggle theme">
+            {theme === 'dark' ? '☀' : '☾'}
+          </button>
+        </div>
         <button className="new-conversation-btn" onClick={onNewConversation}>
           + New Conversation
         </button>
