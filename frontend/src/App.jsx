@@ -154,7 +154,7 @@ function App() {
     }
   };
 
-  const handleSendMessage = async (content, systemPrompt = null) => {
+  const handleSendMessage = async (content, systemPrompt = null, history = null) => {
     if (!currentConversationId) return;
 
     setIsLoading(true);
@@ -187,7 +187,7 @@ function App() {
       }));
 
       // Send message with streaming
-      await api.sendMessageStream(currentConversationId, content, systemPrompt, (eventType, event) => {
+      await api.sendMessageStream(currentConversationId, content, systemPrompt, history, (eventType, event) => {
         switch (eventType) {
           case 'stage1_start':
             setCurrentConversation((prev) => {

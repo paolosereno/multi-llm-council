@@ -67,7 +67,21 @@ export default function ChatInterface({
   const [input, setInput] = useState('');
   const [systemPrompt, setSystemPrompt] = useState('');
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
+  const [includeContext, setIncludeContext] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const buildHistory = () => {
+    if (!includeContext || !conversation?.messages?.length) return null;
+    const history = [];
+    for (const msg of conversation.messages) {
+      if (msg.role === 'user') {
+        history.push({ role: 'user', content: msg.content });
+      } else if (msg.role === 'assistant' && msg.stage3?.response) {
+        history.push({ role: 'assistant', content: msg.stage3.response });
+      }
+    }
+    return history.length > 0 ? history : null;
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -80,7 +94,7 @@ export default function ChatInterface({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (input.trim() && !isLoading) {
-      onSendMessage(input, systemPrompt || null);
+      onSendMessage(input, systemPrompt || null, buildHistory());
       setInput('');
     }
   };
@@ -216,17 +230,28 @@ export default function ChatInterface({
         <div ref={messagesEndRef} />
       </div>
 
-      {conversation.messages.length === 0 && (
-        <form className="input-form" onSubmit={handleSubmit}>
+      <form className="input-form" onSubmit={handleSubmit}>
           <div className="system-prompt-section">
-            <button
-              type="button"
-              className="system-prompt-toggle"
-              onClick={() => setShowSystemPrompt(!showSystemPrompt)}
-            >
-              {showSystemPrompt ? '▼' : '▶'} System Prompt
-              {systemPrompt && <span className="system-prompt-dot"> ●</span>}
-            </button>
+            <div className="form-toggles">
+              <button
+                type="button"
+                className="system-prompt-toggle"
+                onClick={() => setShowSystemPrompt(!showSystemPrompt)}
+              >
+                {showSystemPrompt ? '▼' : '▶'} System Prompt
+                {systemPrompt && <span className="system-prompt-dot"> ●</span>}
+              </button>
+              {conversation.messages.length > 0 && (
+                <button
+                  type="button"
+                  className={`context-toggle ${includeContext ? 'active' : ''}`}
+                  onClick={() => setIncludeContext(!includeContext)}
+                  title="Include previous messages as context"
+                >
+                  Include context
+                </button>
+              )}
+            </div>
             {showSystemPrompt && (
               <textarea
                 className="system-prompt-input"
@@ -256,7 +281,6 @@ export default function ChatInterface({
             </button>
           </div>
         </form>
-      )}
     </div>
   );
 }

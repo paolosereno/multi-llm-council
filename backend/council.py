@@ -5,20 +5,27 @@ from .openrouter import query_models_parallel, query_model
 from .config import get_runtime_config
 
 
-def _build_messages(user_query: str, system_prompt: Optional[str] = None) -> List[Dict[str, str]]:
+def _build_messages(
+    user_query: str,
+    system_prompt: Optional[str] = None,
+    history: Optional[List[Dict]] = None
+) -> List[Dict[str, str]]:
     messages = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
+    if history:
+        messages.extend(history)
     messages.append({"role": "user", "content": user_query})
     return messages
 
 
 async def stage1_collect_responses(
     user_query: str,
-    system_prompt: Optional[str] = None
+    system_prompt: Optional[str] = None,
+    history: Optional[List[Dict]] = None,
 ) -> List[Dict[str, Any]]:
     council_models = get_runtime_config()['council_models']
-    messages = _build_messages(user_query, system_prompt)
+    messages = _build_messages(user_query, system_prompt, history)
     responses = await query_models_parallel(council_models, messages)
 
     stage1_results = []
@@ -35,7 +42,8 @@ async def stage1_collect_responses(
 async def stage2_collect_rankings(
     user_query: str,
     stage1_results: List[Dict[str, Any]],
-    system_prompt: Optional[str] = None
+    system_prompt: Optional[str] = None,
+    history: Optional[List[Dict]] = None,
 ) -> Tuple[List[Dict[str, Any]], Dict[str, str]]:
     council_models = get_runtime_config()['council_models']
 
@@ -82,10 +90,7 @@ FINAL RANKING:
 
 Now provide your evaluation and ranking:"""
 
-    messages = []
-    if system_prompt:
-        messages.append({"role": "system", "content": system_prompt})
-    messages.append({"role": "user", "content": ranking_prompt})
+    messages = _build_messages(ranking_prompt, system_prompt, history)
 
     responses = await query_models_parallel(council_models, messages)
 
@@ -107,7 +112,8 @@ async def stage3_synthesize_final(
     user_query: str,
     stage1_results: List[Dict[str, Any]],
     stage2_results: List[Dict[str, Any]],
-    system_prompt: Optional[str] = None
+    system_prompt: Optional[str] = None,
+    history: Optional[List[Dict]] = None,
 ) -> Dict[str, Any]:
     chairman_model = get_runtime_config()['chairman_model']
 
@@ -138,10 +144,7 @@ Your task as Chairman is to synthesize all of this information into a single, co
 
 Provide a clear, well-reasoned final answer that represents the council's collective wisdom:"""
 
-    messages = []
-    if system_prompt:
-        messages.append({"role": "system", "content": system_prompt})
-    messages.append({"role": "user", "content": chairman_prompt})
+    messages = _build_messages(chairman_prompt, system_prompt, history)
 
     response = await query_model(chairman_model, messages)
 
@@ -223,9 +226,10 @@ Title:"""
 
 async def run_full_council(
     user_query: str,
-    system_prompt: Optional[str] = None
+    system_prompt: Optional[str] = None,
+    history: Optional[List[Dict]] = None,
 ) -> Tuple[List, List, Dict, Dict]:
-    stage1_results = await stage1_collect_responses(user_query, system_prompt)
+    stage1_results = await stage1_collect_responses(user_query, system_prompt, history)
 
     if not stage1_results:
         return [], [], {
@@ -234,13 +238,13 @@ async def run_full_council(
         }, {}
 
     stage2_results, label_to_model = await stage2_collect_rankings(
-        user_query, stage1_results, system_prompt
+        user_query, stage1_results, system_prompt, history
     )
 
     aggregate_rankings = calculate_aggregate_rankings(stage2_results, label_to_model)
 
     stage3_result = await stage3_synthesize_final(
-        user_query, stage1_results, stage2_results, system_prompt
+        user_query, stage1_results, stage2_results, system_prompt, history
     )
 
     metadata = {

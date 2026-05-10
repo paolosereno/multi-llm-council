@@ -144,9 +144,10 @@ export const api = {
     }
   },
 
-  async sendMessageStream(conversationId, content, systemPrompt, onEvent) {
+  async sendMessageStream(conversationId, content, systemPrompt, history, onEvent) {
     const body = { content };
     if (systemPrompt) body.system_prompt = systemPrompt;
+    if (history?.length) body.history = history;
 
     const response = await fetch(
       `${API_BASE}/api/conversations/${conversationId}/message/stream`,

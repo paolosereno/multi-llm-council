@@ -180,6 +180,12 @@
   gap: 6px;
 }
 
+.form-toggles {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .system-prompt-toggle {
   background: none;
   border: none;
@@ -188,11 +194,32 @@
   cursor: pointer;
   padding: 0;
   text-align: left;
-  width: fit-content;
 }
 
 .system-prompt-toggle:hover {
   color: var(--text-primary);
+}
+
+.context-toggle {
+  padding: 3px 10px;
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.context-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.context-toggle.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
 }
 
 .system-prompt-dot {
