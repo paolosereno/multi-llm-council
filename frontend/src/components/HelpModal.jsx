@@ -20,6 +20,7 @@ const sections = [
         </div>
         <p style={{ marginTop: 10, fontSize: 13, color: 'var(--text-secondary)' }}>
           If a model fails, its tab in Stage 1 is shown in red with a ⚠ indicator. Failed models are excluded from Stage 2 ranking automatically.
+          Each model has a <strong>60-second timeout</strong>; each stage has a <strong>90-second cap</strong>. If a stage times out, an error banner appears and the remaining stages are skipped.
         </p>
       </div>
     ),
