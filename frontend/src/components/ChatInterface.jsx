@@ -5,6 +5,59 @@ import Stage2 from './Stage2';
 import Stage3 from './Stage3';
 import './ChatInterface.css';
 
+function buildMarkdown(conversation) {
+  const lines = [`# ${conversation.title || 'LLM Council Conversation'}`, ''];
+
+  let qIndex = 0;
+  for (const msg of conversation.messages) {
+    if (msg.role === 'user') {
+      qIndex++;
+      lines.push('---', '', `## Question ${qIndex}`, '', msg.content, '');
+    } else {
+      if (msg.stage1?.length > 0) {
+        lines.push('### Stage 1: Individual Responses', '');
+        for (const resp of msg.stage1) {
+          const name = resp.model.split('/')[1] || resp.model;
+          lines.push(`#### ${name}`, '', resp.response || '', '');
+        }
+      }
+
+      if (msg.stage2?.length > 0) {
+        lines.push('### Stage 2: Peer Rankings', '');
+        if (msg.metadata?.aggregate_rankings?.length > 0) {
+          lines.push('#### Aggregate Rankings', '');
+          msg.metadata.aggregate_rankings.forEach((agg, i) => {
+            const name = agg.model.split('/')[1] || agg.model;
+            lines.push(`${i + 1}. **${name}** — avg: ${agg.average_rank.toFixed(2)} (${agg.rankings_count} votes)`);
+          });
+          lines.push('');
+        }
+        lines.push('#### Individual Evaluations', '');
+        for (const rank of msg.stage2) {
+          const name = rank.model.split('/')[1] || rank.model;
+          lines.push(`##### ${name}`, '', rank.ranking || '', '');
+          if (rank.parsed_ranking?.length > 0) {
+            const labelToModel = msg.metadata?.label_to_model;
+            lines.push('**Extracted ranking:**');
+            rank.parsed_ranking.forEach((label, i) => {
+              const modelName = labelToModel?.[label]?.split('/')[1] || label;
+              lines.push(`${i + 1}. ${modelName}`);
+            });
+            lines.push('');
+          }
+        }
+      }
+
+      if (msg.stage3) {
+        const chairman = msg.stage3.model.split('/')[1] || msg.stage3.model;
+        lines.push('### Stage 3: Final Answer', '', `*Chairman: ${chairman}*`, '', msg.stage3.response || '', '');
+      }
+    }
+  }
+
+  return lines.join('\n');
+}
+
 export default function ChatInterface({
   conversation,
   onSendMessage,
@@ -37,6 +90,20 @@ export default function ChatInterface({
     }
   };
 
+  const handleExport = () => {
+    const markdown = buildMarkdown(conversation);
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const filename = (conversation.title || 'council')
+      .replace(/[^a-z0-9]/gi, '_')
+      .toLowerCase();
+    a.download = `${filename}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (!conversation) {
     return (
       <div className="chat-interface">
@@ -48,8 +115,20 @@ export default function ChatInterface({
     );
   }
 
+  const hasResults = conversation.messages.some(
+    (m) => m.role === 'assistant' && m.stage3
+  );
+
   return (
     <div className="chat-interface">
+      <div className="chat-header">
+        <span className="chat-title">{conversation.title || 'New Conversation'}</span>
+        {hasResults && (
+          <button className="export-btn" onClick={handleExport}>
+            Export MD
+          </button>
+        )}
+      </div>
       <div className="messages-container">
         {conversation.messages.length === 0 ? (
           <div className="empty-state">
