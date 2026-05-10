@@ -93,7 +93,9 @@ const sections = [
       <p>
         Click the <strong>↺</strong> button in the header of any completed response to re-run
         the council on the same question. The previous answer is replaced.
-        The original system prompt is reused automatically.
+        The original system prompt is reused automatically. The execution mode used is the one
+        <strong>currently selected</strong> in the UI — change it before clicking ↺ to re-run
+        with different models.
       </p>
     ),
   },

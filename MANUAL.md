@@ -75,7 +75,7 @@ If a model list is empty, the Council list is used as fallback. When you select 
 
 ## ↺ Re-run
 
-Click the **↺** button in the header of any completed response to re-run the council on the same question. The previous answer is replaced. The original system prompt is reused automatically.
+Click the **↺** button in the header of any completed response to re-run the council on the same question. The previous answer is replaced. The original system prompt is reused automatically. The execution mode used is the one **currently selected** in the UI — change it before clicking ↺ to re-run with different models.
 
 ---
 
