@@ -1,4 +1,4 @@
-# LLM Council
+# Multi LLM Council
 
 ![llmcouncil](header.jpg)
 
@@ -81,7 +81,7 @@ Then open http://localhost:5173 in your browser.
 - **Multi-turn conversations** — An optional "Include context" toggle passes the conversation history to all three stages so follow-up questions work naturally.
 - **System prompt** — An optional system prompt field lets you give context or persona instructions that apply to all three stages.
 - **Re-run council** — A ↺ button on any completed response re-runs the full council on the same question, replacing the previous answer.
-- **Model configuration UI** — Change the council models and chairman directly from the ⚙ Settings panel; the change persists and takes effect immediately without a restart.
+- **Model configuration UI** — Change the council models and chairman directly from the ⚙ Settings panel; the change persists and takes effect immediately without a restart. A searchable dropdown fetches the full OpenRouter model catalogue and shows name, ID, and pricing (input/output cost per 1M tokens) for each model.
 - **Model statistics** — The ▤ icon opens a dashboard showing each model's average rank, win count, and win rate across all past council runs. Stats can be reset to start fresh.
 - **Performance metrics** — The ~ icon opens a metrics dashboard with latency, token usage, and cost per model for the latest run and aggregated historical averages (powered by Recharts).
 - **Light / dark theme** — Toggle with the ☾/☀ button in the sidebar header.
