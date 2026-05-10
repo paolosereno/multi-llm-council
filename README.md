@@ -22,6 +22,8 @@ This is a fork of [karpathy/llm-council](https://github.com/karpathy/llm-council
 
 ![Screenshot 3](screenshot3.jpg)
 
+![Screenshot 4](screenshot4.jpg)
+
 ## Setup
 
 ### 1. Install Dependencies
