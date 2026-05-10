@@ -258,6 +258,12 @@
   color: #fff;
 }
 
+.mode-warn {
+  margin-left: 4px;
+  font-size: 10px;
+  opacity: 0.85;
+}
+
 .system-prompt-input {
   width: 100%;
   padding: 10px 12px;

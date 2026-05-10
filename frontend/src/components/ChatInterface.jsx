@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import Stage1 from './Stage1';
 import Stage2 from './Stage2';
 import Stage3 from './Stage3';
+import { api } from '../api';
 import './ChatInterface.css';
 
 function buildMarkdown(conversation) {
@@ -69,7 +70,17 @@ export default function ChatInterface({
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
   const [includeContext, setIncludeContext] = useState(false);
   const [executionMode, setExecutionMode] = useState('normal');
+  const [emptyLists, setEmptyLists] = useState({ fast: false, budget: false });
   const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    api.getConfig().then((config) => {
+      setEmptyLists({
+        fast: !config.fast_models?.length,
+        budget: !config.budget_models?.length,
+      });
+    }).catch(() => {});
+  }, []);
 
   const buildHistory = () => {
     if (!includeContext || !conversation?.messages?.length) return null;
@@ -253,14 +264,20 @@ export default function ChatInterface({
               </button>
             </div>
             <div className="mode-selector">
-              {['normal', 'fast', 'budget', 'hybrid'].map((mode) => (
+              {[
+                { id: 'normal',  label: 'Normal',  warn: false },
+                { id: 'fast',    label: 'Fast',    warn: emptyLists.fast },
+                { id: 'budget',  label: 'Budget',  warn: emptyLists.budget },
+                { id: 'hybrid',  label: 'Hybrid',  warn: emptyLists.budget },
+              ].map(({ id, label, warn }) => (
                 <button
-                  key={mode}
+                  key={id}
                   type="button"
-                  className={`mode-btn ${executionMode === mode ? 'active' : ''}`}
-                  onClick={() => setExecutionMode(mode)}
+                  className={`mode-btn ${executionMode === id ? 'active' : ''}`}
+                  onClick={() => setExecutionMode(id)}
+                  title={warn ? 'Model list not configured — will use Council models as fallback' : undefined}
                 >
-                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  {label}{warn && <span className="mode-warn">⚠</span>}
                 </button>
               ))}
             </div>
