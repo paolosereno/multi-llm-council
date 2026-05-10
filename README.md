@@ -14,6 +14,12 @@ In a bit more detail, here is what happens when you submit a query:
 
 This is a fork of [karpathy/llm-council](https://github.com/karpathy/llm-council), originally vibe-coded as a Saturday hack to explore multiple LLMs side by side. This fork extends the original with a richer UI and additional features — see the Features section below for the full list. It is provided as-is for inspiration; ask your LLM to adapt it however you like.
 
+## Screenshots
+
+![Screenshot 1](screenshot1.jpg)
+
+![Screenshot 2](screenshot2.jpg)
+
 ## Setup
 
 ### 1. Install Dependencies
