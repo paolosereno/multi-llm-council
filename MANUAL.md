@@ -10,9 +10,10 @@
 6. [Re-run](#re-run)
 7. [Managing conversations](#managing-conversations)
 8. [Model configuration](#model-configuration)
-9. [Model statistics](#model-statistics)
-10. [Performance metrics](#performance-metrics)
-11. [Light / dark theme](#light--dark-theme)
+9. [Model catalogue](#model-catalogue)
+10. [Model statistics](#model-statistics)
+11. [Performance metrics](#performance-metrics)
+12. [Light / dark theme](#light--dark-theme)
 
 ---
 
