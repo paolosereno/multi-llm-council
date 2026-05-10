@@ -22,8 +22,8 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 **`openrouter.py`**
 - `query_model()`: Single async model query
 - `query_models_parallel()`: Parallel queries using `asyncio.gather()`
-- Returns dict with `content`, `latency_ms`, `prompt_tokens`, `completion_tokens`, `cost`
-- Graceful degradation: returns None on failure, continues with successful responses
+- Returns dict with `content`, `latency_ms`, `prompt_tokens`, `completion_tokens`, `cost` on success
+- On failure returns `{'error': str(e)}` (never `None`) so callers can distinguish error from empty response
 - Headers include `X-Title: Multi LLM Council` and `HTTP-Referer: https://github.com/paolosereno/multi-llm-council` for OpenRouter app identification
 
 **`council.py`** - The Core Logic
@@ -32,8 +32,9 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
   - `fast`: fast_models (fallback to council_models if empty)
   - `budget`: budget_models (fallback to council_models if empty)
   - `hybrid`: council_models for stage 1, budget_models for stage 2 (fallback if empty)
-- `stage1_collect_responses(user_query, system_prompt, history, execution_mode)`: parallel queries
+- `stage1_collect_responses(user_query, system_prompt, history, execution_mode)`: parallel queries; includes failed models as `{"model": ..., "error": ..., "response": None}` entries
 - `stage2_collect_rankings(user_query, stage1_results, system_prompt, history, execution_mode)`:
+  - Filters out error entries from stage1 before building ranking prompt
   - Anonymizes responses as "Response A, B, C, etc."
   - Creates `label_to_model` mapping for de-anonymization
   - Prompts models to evaluate and rank (with strict format requirements)
@@ -51,7 +52,7 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 
 **`main.py`**
 - FastAPI app with CORS enabled for localhost:5173 and localhost:3000
-- `SendMessageRequest` includes `execution_mode: str = 'normal'`
+- `SendMessageRequest` includes `execution_mode: str = 'normal'` and a `field_validator` that rejects empty content and messages over 10,000 characters
 - `CouncilConfigRequest` includes `fast_models: List[str] = []` and `budget_models: List[str] = []`
 - `GET /api/models`: proxy to OpenRouter models list, returns `id`, `name`, `pricing` per model
 - `GET /api/config` / `PUT /api/config`: read/write runtime config including fast/budget model lists
@@ -74,10 +75,11 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 - `getModels()`: calls `GET /api/models` to fetch OpenRouter model catalogue
 
 **`components/ChatInterface.jsx`**
-- Multiline textarea (3 rows, resizable)
+- Multiline textarea (3 rows, resizable), max 10,000 characters enforced client-side
+- Character counter appears when input exceeds 80% of limit; turns red at limit
 - Enter to send, Shift+Enter for new line
 - Execution mode selector: Normal / Fast / Budget / Hybrid buttons
-- Fetches config on mount to detect empty fast_models / budget_models; shows ⚠ on affected mode buttons with tooltip explaining the fallback
+- Fetches config on mount to detect empty fast_models / budget_models; active mode button turns orange and an inline warning message appears below the selector when the relevant list is empty
 - executionMode state is local to ChatInterface, passed in `onSendMessage` and `onRerun` calls
 
 **`components/SettingsModal.jsx`**
@@ -89,6 +91,7 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 
 **`components/Stage1.jsx`**
 - Tab view of individual model responses
+- Failed models shown as error tabs (red border, ⚠ in label); tab content shows error message and detail
 - ReactMarkdown rendering with markdown-content wrapper
 
 **`components/Stage2.jsx`**
@@ -170,6 +173,7 @@ Runtime config is saved to `data/council_config.json`. The file includes all fou
 3. **Ranking Parse Failures**: If models don't follow format, fallback regex extracts any "Response X" patterns in order
 4. **Missing Metadata**: Metadata is ephemeral (not persisted), only available in API responses
 5. **Model list fallback**: Empty fast_models or budget_models silently fall back to council_models — check ⚠ in UI
+6. **Error response format**: `query_model()` now returns `{'error': str(e)}` on failure (not `None`). Code that checks `if response is not None` must also check `if 'error' not in response` to skip failures
 
 ## Features Implemented (as of 2026-05-10)
 
