@@ -8,6 +8,53 @@ import './MetricsModal.css';
 
 const shortName = (model) => model.split('/').pop();
 
+function StatBox({ label, value, unit = '' }) {
+  return (
+    <div className="metrics-stat">
+      <span className="metrics-stat-value">{value != null ? `${value}${unit}` : '—'}</span>
+      <span className="metrics-stat-label">{label}</span>
+    </div>
+  );
+}
+
+function StageChart({ title, latencyData, tokenData, tooltipStyle, textColor, gridColor }) {
+  return (
+    <section className="metrics-section">
+      <h3 className="metrics-section-title">{title}</h3>
+      {latencyData.length > 0 && (
+        <>
+          <p className="metrics-chart-label">Latenza (ms)</p>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={latencyData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="model" tick={{ fill: textColor, fontSize: 12 }} />
+              <YAxis tick={{ fill: textColor, fontSize: 12 }} unit="ms" width={56} />
+              <Tooltip {...tooltipStyle} />
+              <Bar dataKey="Latenza (ms)" fill="#4a90e2" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </>
+      )}
+      {tokenData.length > 0 && (
+        <>
+          <p className="metrics-chart-label">Token (input + output)</p>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={tokenData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="model" tick={{ fill: textColor, fontSize: 12 }} />
+              <YAxis tick={{ fill: textColor, fontSize: 12 }} width={56} />
+              <Tooltip {...tooltipStyle} />
+              <Legend wrapperStyle={{ fontSize: 12, color: textColor }} />
+              <Bar dataKey="Input" fill="#4a90e2" stackId="t" />
+              <Bar dataKey="Output" fill="#82ca9d" stackId="t" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </>
+      )}
+    </section>
+  );
+}
+
 export default function MetricsModal({ onClose, currentConversation, theme }) {
   const [tab, setTab] = useState('current');
   const [historicalData, setHistoricalData] = useState(null);
@@ -41,31 +88,37 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
     labelStyle: { color: isDark ? '#e0e0e0' : '#333' },
   };
 
-  const latencyData = lastAssistant?.stage1
+  // Stage 1 chart data
+  const s1LatencyData = lastAssistant?.stage1
     ?.filter((r) => r.latency_ms != null)
     ?.map((r) => ({ model: shortName(r.model), 'Latenza (ms)': r.latency_ms })) ?? [];
 
-  const tokenData = lastAssistant?.stage1
+  const s1TokenData = lastAssistant?.stage1
     ?.filter((r) => r.prompt_tokens != null)
-    ?.map((r) => ({
-      model: shortName(r.model),
-      'Input': r.prompt_tokens,
-      'Output': r.completion_tokens,
-    })) ?? [];
+    ?.map((r) => ({ model: shortName(r.model), 'Input': r.prompt_tokens, 'Output': r.completion_tokens })) ?? [];
 
+  // Stage 2 chart data
+  const s2LatencyData = lastAssistant?.stage2
+    ?.filter((r) => r.latency_ms != null)
+    ?.map((r) => ({ model: shortName(r.model), 'Latenza (ms)': r.latency_ms })) ?? [];
+
+  const s2TokenData = lastAssistant?.stage2
+    ?.filter((r) => r.prompt_tokens != null)
+    ?.map((r) => ({ model: shortName(r.model), 'Input': r.prompt_tokens, 'Output': r.completion_tokens })) ?? [];
+
+  // Stage 3 (chairman)
+  const s3 = lastAssistant?.stage3;
+
+  // Historical chart data
   const histLatencyData = historicalData?.by_model
     ?.filter((m) => m.avg_latency_ms != null)
     ?.map((m) => ({ model: m.short_name, 'Latenza media (ms)': m.avg_latency_ms, _runs: m.sample_count })) ?? [];
 
   const histTokenData = historicalData?.by_model
     ?.filter((m) => m.avg_prompt_tokens != null)
-    ?.map((m) => ({
-      model: m.short_name,
-      'Input medio': m.avg_prompt_tokens,
-      'Output medio': m.avg_completion_tokens,
-    })) ?? [];
+    ?.map((m) => ({ model: m.short_name, 'Input medio': m.avg_prompt_tokens, 'Output medio': m.avg_completion_tokens })) ?? [];
 
-  const s3 = lastAssistant?.stage3;
+  const histChairman = historicalData?.chairman?.[0];
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -76,16 +129,10 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
         </div>
 
         <div className="metrics-tabs">
-          <button
-            className={`metrics-tab${tab === 'current' ? ' active' : ''}`}
-            onClick={() => setTab('current')}
-          >
+          <button className={`metrics-tab${tab === 'current' ? ' active' : ''}`} onClick={() => setTab('current')}>
             Ultima run
           </button>
-          <button
-            className={`metrics-tab${tab === 'historical' ? ' active' : ''}`}
-            onClick={() => setTab('historical')}
-          >
+          <button className={`metrics-tab${tab === 'historical' ? ' active' : ''}`} onClick={() => setTab('historical')}>
             Storico
           </button>
         </div>
@@ -95,65 +142,42 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
           {tab === 'current' && (
             !hasCurrentData ? (
               <div className="metrics-empty">
-                Nessun dato disponibile. Invia una domanda al council per vedere le metriche in tempo reale.
+                Nessun dato disponibile. Invia una domanda al council per vedere le metriche.
               </div>
             ) : (
               <>
-                {latencyData.length > 0 && (
-                  <section className="metrics-section">
-                    <h3 className="metrics-section-title">Latenza Stage 1 per modello</h3>
-                    <ResponsiveContainer width="100%" height={200}>
-                      <BarChart data={latencyData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-                        <XAxis dataKey="model" tick={{ fill: textColor, fontSize: 12 }} />
-                        <YAxis tick={{ fill: textColor, fontSize: 12 }} unit="ms" width={56} />
-                        <Tooltip {...tooltipStyle} />
-                        <Bar dataKey="Latenza (ms)" fill="#4a90e2" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </section>
-                )}
+                <StageChart
+                  title="Stage 1 — Prime opinioni"
+                  latencyData={s1LatencyData}
+                  tokenData={s1TokenData}
+                  tooltipStyle={tooltipStyle}
+                  textColor={textColor}
+                  gridColor={gridColor}
+                />
 
-                {tokenData.length > 0 && (
-                  <section className="metrics-section">
-                    <h3 className="metrics-section-title">Token Stage 1 per modello</h3>
-                    <ResponsiveContainer width="100%" height={200}>
-                      <BarChart data={tokenData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-                        <XAxis dataKey="model" tick={{ fill: textColor, fontSize: 12 }} />
-                        <YAxis tick={{ fill: textColor, fontSize: 12 }} width={56} />
-                        <Tooltip {...tooltipStyle} />
-                        <Legend wrapperStyle={{ fontSize: 12, color: textColor }} />
-                        <Bar dataKey="Input" fill="#4a90e2" stackId="t" />
-                        <Bar dataKey="Output" fill="#82ca9d" stackId="t" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </section>
-                )}
+                <StageChart
+                  title="Stage 2 — Revisione tra pari"
+                  latencyData={s2LatencyData}
+                  tokenData={s2TokenData}
+                  tooltipStyle={tooltipStyle}
+                  textColor={textColor}
+                  gridColor={gridColor}
+                />
 
-                {s3?.latency_ms != null && (
-                  <section className="metrics-section">
-                    <h3 className="metrics-section-title">Chairman — Stage 3</h3>
-                    <div className="metrics-stat-row">
-                      <div className="metrics-stat">
-                        <span className="metrics-stat-value">{s3.latency_ms} ms</span>
-                        <span className="metrics-stat-label">Latenza</span>
-                      </div>
-                      {s3.prompt_tokens != null && (
-                        <>
-                          <div className="metrics-stat">
-                            <span className="metrics-stat-value">{s3.prompt_tokens}</span>
-                            <span className="metrics-stat-label">Token input</span>
-                          </div>
-                          <div className="metrics-stat">
-                            <span className="metrics-stat-value">{s3.completion_tokens}</span>
-                            <span className="metrics-stat-label">Token output</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </section>
-                )}
+                <section className="metrics-section">
+                  <h3 className="metrics-section-title">
+                    Stage 3 — Chairman
+                    {s3?.model && <span className="metrics-model-name"> ({shortName(s3.model)})</span>}
+                  </h3>
+                  <div className="metrics-stat-row">
+                    <StatBox label="Latenza" value={s3?.latency_ms} unit=" ms" />
+                    <StatBox label="Token input" value={s3?.prompt_tokens} />
+                    <StatBox label="Token output" value={s3?.completion_tokens} />
+                    {s3?.prompt_tokens != null && s3?.completion_tokens != null && (
+                      <StatBox label="Token totali" value={s3.prompt_tokens + s3.completion_tokens} />
+                    )}
+                  </div>
+                </section>
               </>
             )
           )}
@@ -175,15 +199,15 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
 
                 {histLatencyData.length > 0 && (
                   <section className="metrics-section">
-                    <h3 className="metrics-section-title">Latenza media Stage 1 per modello</h3>
-                    <ResponsiveContainer width="100%" height={200}>
+                    <h3 className="metrics-section-title">Stage 1 — Latenza media per modello</h3>
+                    <ResponsiveContainer width="100%" height={190}>
                       <BarChart data={histLatencyData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                         <XAxis dataKey="model" tick={{ fill: textColor, fontSize: 12 }} />
                         <YAxis tick={{ fill: textColor, fontSize: 12 }} unit="ms" width={56} />
                         <Tooltip
                           {...tooltipStyle}
-                          formatter={(v, _name, props) => [`${v} ms (n=${props.payload._runs})`, 'Latenza media']}
+                          formatter={(v, _n, props) => [`${v} ms (n=${props.payload._runs})`, 'Latenza media']}
                         />
                         <Bar dataKey="Latenza media (ms)" fill="#4a90e2" radius={[4, 4, 0, 0]} />
                       </BarChart>
@@ -193,8 +217,8 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
 
                 {histTokenData.length > 0 && (
                   <section className="metrics-section">
-                    <h3 className="metrics-section-title">Token medi Stage 1 per modello</h3>
-                    <ResponsiveContainer width="100%" height={200}>
+                    <h3 className="metrics-section-title">Stage 1 — Token medi per modello</h3>
+                    <ResponsiveContainer width="100%" height={190}>
                       <BarChart data={histTokenData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                         <XAxis dataKey="model" tick={{ fill: textColor, fontSize: 12 }} />
@@ -205,6 +229,21 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
                         <Bar dataKey="Output medio" fill="#82ca9d" stackId="t" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
+                  </section>
+                )}
+
+                {histChairman && (
+                  <section className="metrics-section">
+                    <h3 className="metrics-section-title">
+                      Stage 3 — Chairman
+                      <span className="metrics-model-name"> ({histChairman.short_name})</span>
+                    </h3>
+                    <div className="metrics-stat-row">
+                      <StatBox label="Latenza media" value={histChairman.avg_latency_ms} unit=" ms" />
+                      <StatBox label="Input medio" value={histChairman.avg_prompt_tokens} />
+                      <StatBox label="Output medio" value={histChairman.avg_completion_tokens} />
+                      <StatBox label="Campioni" value={histChairman.sample_count} />
+                    </div>
                   </section>
                 )}
               </>

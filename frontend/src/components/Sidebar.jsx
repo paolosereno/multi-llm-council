@@ -50,7 +50,7 @@ export default function Sidebar({
               ▤
             </button>
             <button className="theme-toggle-btn" onClick={() => setMetricsOpen(true)} title="Performance metrics">
-              ⌇
+              ≋
             </button>
             <button className="theme-toggle-btn" onClick={() => setHelpOpen(true)} title="Help">
               ?

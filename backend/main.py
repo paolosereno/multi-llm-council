@@ -230,7 +230,44 @@ async def get_metrics():
         by_model.append(entry)
 
     by_model.sort(key=lambda x: x.get('avg_latency_ms', 0))
-    return {'by_model': by_model, 'total_runs': total_runs}
+
+    # Aggregate Stage 3 (chairman) data separately
+    s3_data = defaultdict(lambda: {'latencies': [], 'prompt_tokens': [], 'completion_tokens': []})
+    for filename in os.listdir(storage.DATA_DIR):
+        if not filename.endswith('.json'):
+            continue
+        conv = storage.get_conversation(filename[:-5])
+        if conv is None:
+            continue
+        if reset_at and conv.get("created_at", "") < reset_at:
+            continue
+        for msg in conv.get('messages', []):
+            if msg.get('role') != 'assistant':
+                continue
+            s3 = msg.get('stage3') or {}
+            model = s3.get('model')
+            if not model or s3.get('latency_ms') is None:
+                continue
+            s3_data[model]['latencies'].append(s3['latency_ms'])
+            if s3.get('prompt_tokens') is not None:
+                s3_data[model]['prompt_tokens'].append(s3['prompt_tokens'])
+                s3_data[model]['completion_tokens'].append(s3['completion_tokens'])
+
+    chairman_stats = []
+    for model, d in s3_data.items():
+        entry = {
+            'model': model,
+            'short_name': model.split('/')[-1],
+            'sample_count': len(d['latencies']),
+        }
+        if d['latencies']:
+            entry['avg_latency_ms'] = round(sum(d['latencies']) / len(d['latencies']))
+        if d['prompt_tokens']:
+            entry['avg_prompt_tokens'] = round(sum(d['prompt_tokens']) / len(d['prompt_tokens']))
+            entry['avg_completion_tokens'] = round(sum(d['completion_tokens']) / len(d['completion_tokens']))
+        chairman_stats.append(entry)
+
+    return {'by_model': by_model, 'chairman': chairman_stats, 'total_runs': total_runs}
 
 
 @app.get("/api/config")
