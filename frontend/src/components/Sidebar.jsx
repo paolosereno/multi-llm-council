@@ -14,6 +14,8 @@ export default function Sidebar({
   onDeleteConversation,
   theme,
   onToggleTheme,
+  showModels,
+  onToggleModels,
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
@@ -44,6 +46,13 @@ export default function Sidebar({
         <div className="sidebar-header-actions">
           <button className="theme-toggle-btn" onClick={onToggleTheme} title="Toggle theme">
             {theme === 'dark' ? '☀' : '☾'}
+          </button>
+          <button
+            className={`theme-toggle-btn ${showModels ? 'sidebar-btn-active' : ''}`}
+            onClick={onToggleModels}
+            title="OpenRouter model catalogue"
+          >
+            ⊟
           </button>
           <button className="theme-toggle-btn" onClick={() => setStatsOpen(true)} title="Model statistics">
             ▤

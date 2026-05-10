@@ -46,6 +46,18 @@
   color: var(--text-primary);
 }
 
+.sidebar-btn-active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.sidebar-btn-active:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: #fff;
+}
+
 .search-input {
   width: 100%;
   margin-top: 10px;

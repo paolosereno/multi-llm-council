@@ -312,6 +312,8 @@ async def list_available_models():
         {
             "id": m["id"],
             "name": m.get("name", m["id"]),
+            "description": m.get("description", ""),
+            "context_length": m.get("context_length"),
             "pricing": m.get("pricing", {}),
         }
         for m in data.get("data", [])

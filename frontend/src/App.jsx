@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import ChatInterface from './components/ChatInterface';
+import ModelsPage from './components/ModelsPage';
 import { api } from './api';
 import './App.css';
 
@@ -9,6 +10,7 @@ function App() {
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const [currentConversation, setCurrentConversation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showModels, setShowModels] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
 
   useEffect(() => {
@@ -308,13 +310,19 @@ function App() {
         onDeleteConversation={handleDeleteConversation}
         theme={theme}
         onToggleTheme={handleToggleTheme}
+        showModels={showModels}
+        onToggleModels={() => setShowModels((v) => !v)}
       />
-      <ChatInterface
-        conversation={currentConversation}
-        onSendMessage={handleSendMessage}
-        onRerun={handleRerun}
-        isLoading={isLoading}
-      />
+      {showModels ? (
+        <ModelsPage onClose={() => setShowModels(false)} />
+      ) : (
+        <ChatInterface
+          conversation={currentConversation}
+          onSendMessage={handleSendMessage}
+          onRerun={handleRerun}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 }
