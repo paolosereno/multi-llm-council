@@ -8,6 +8,14 @@ import './MetricsModal.css';
 
 const shortName = (model) => model.split('/').pop();
 
+const formatCost = (v) => {
+  if (v == null) return '—';
+  if (v === 0) return 'free';
+  if (v < 0.0001) return `$${v.toFixed(6)}`;
+  if (v < 0.01)   return `$${v.toFixed(4)}`;
+  return `$${v.toFixed(3)}`;
+};
+
 function StatBox({ label, value, unit = '' }) {
   return (
     <div className="metrics-stat">
@@ -17,7 +25,16 @@ function StatBox({ label, value, unit = '' }) {
   );
 }
 
-function StageChart({ title, latencyData, tokenData, tooltipStyle, textColor, gridColor }) {
+function CostStatBox({ label, value }) {
+  return (
+    <div className="metrics-stat">
+      <span className="metrics-stat-value metrics-stat-cost">{formatCost(value)}</span>
+      <span className="metrics-stat-label">{label}</span>
+    </div>
+  );
+}
+
+function StageChart({ title, latencyData, tokenData, costData, tooltipStyle, textColor, gridColor }) {
   return (
     <section className="metrics-section">
       <h3 className="metrics-section-title">{title}</h3>
@@ -49,6 +66,19 @@ function StageChart({ title, latencyData, tokenData, tooltipStyle, textColor, gr
               <Bar dataKey="Output" fill="#82ca9d" stackId="t" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+        </>
+      )}
+      {costData.length > 0 && (
+        <>
+          <p className="metrics-chart-label">Cost (USD)</p>
+          <div className="metrics-cost-row">
+            {costData.map((d) => (
+              <div key={d.model} className="metrics-cost-item">
+                <span className="metrics-cost-value">{formatCost(d.cost)}</span>
+                <span className="metrics-cost-model">{d.model}</span>
+              </div>
+            ))}
+          </div>
         </>
       )}
     </section>
@@ -96,6 +126,10 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
     ?.filter((r) => r.prompt_tokens != null)
     ?.map((r) => ({ model: shortName(r.model), 'Input': r.prompt_tokens, 'Output': r.completion_tokens })) ?? [];
 
+  const s1CostData = lastAssistant?.stage1
+    ?.filter((r) => r.cost != null)
+    ?.map((r) => ({ model: shortName(r.model), cost: r.cost })) ?? [];
+
   const s2LatencyData = lastAssistant?.stage2
     ?.filter((r) => r.latency_ms != null)
     ?.map((r) => ({ model: shortName(r.model), 'Latency (ms)': r.latency_ms })) ?? [];
@@ -104,7 +138,19 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
     ?.filter((r) => r.prompt_tokens != null)
     ?.map((r) => ({ model: shortName(r.model), 'Input': r.prompt_tokens, 'Output': r.completion_tokens })) ?? [];
 
+  const s2CostData = lastAssistant?.stage2
+    ?.filter((r) => r.cost != null)
+    ?.map((r) => ({ model: shortName(r.model), cost: r.cost })) ?? [];
+
   const s3 = lastAssistant?.stage3;
+
+  // Total run cost
+  const allCosts = [
+    ...(lastAssistant?.stage1?.map((r) => r.cost) ?? []),
+    ...(lastAssistant?.stage2?.map((r) => r.cost) ?? []),
+    s3?.cost,
+  ].filter((c) => c != null);
+  const totalRunCost = allCosts.length > 0 ? allCosts.reduce((a, b) => a + b, 0) : null;
 
   const histLatencyData = historicalData?.by_model
     ?.filter((m) => m.avg_latency_ms != null)
@@ -113,6 +159,10 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
   const histTokenData = historicalData?.by_model
     ?.filter((m) => m.avg_prompt_tokens != null)
     ?.map((m) => ({ model: m.short_name, 'Avg input': m.avg_prompt_tokens, 'Avg output': m.avg_completion_tokens })) ?? [];
+
+  const histCostData = historicalData?.by_model
+    ?.filter((m) => m.avg_cost != null)
+    ?.map((m) => ({ model: m.short_name, avg_cost: m.avg_cost, total_cost: m.total_cost })) ?? [];
 
   const histChairman = historicalData?.chairman?.[0];
 
@@ -142,10 +192,17 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
               </div>
             ) : (
               <>
+                {totalRunCost != null && (
+                  <div className="metrics-run-cost">
+                    Total run cost: <strong>{formatCost(totalRunCost)}</strong>
+                  </div>
+                )}
+
                 <StageChart
                   title="Stage 1 — Individual responses"
                   latencyData={s1LatencyData}
                   tokenData={s1TokenData}
+                  costData={s1CostData}
                   tooltipStyle={tooltipStyle}
                   textColor={textColor}
                   gridColor={gridColor}
@@ -155,6 +212,7 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
                   title="Stage 2 — Peer review"
                   latencyData={s2LatencyData}
                   tokenData={s2TokenData}
+                  costData={s2CostData}
                   tooltipStyle={tooltipStyle}
                   textColor={textColor}
                   gridColor={gridColor}
@@ -169,9 +227,7 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
                     <StatBox label="Latency" value={s3?.latency_ms} unit=" ms" />
                     <StatBox label="Input tokens" value={s3?.prompt_tokens} />
                     <StatBox label="Output tokens" value={s3?.completion_tokens} />
-                    {s3?.prompt_tokens != null && s3?.completion_tokens != null && (
-                      <StatBox label="Total tokens" value={s3.prompt_tokens + s3.completion_tokens} />
-                    )}
+                    <CostStatBox label="Cost" value={s3?.cost} />
                   </div>
                 </section>
               </>
@@ -228,6 +284,26 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
                   </section>
                 )}
 
+                {histCostData.length > 0 && (
+                  <section className="metrics-section">
+                    <h3 className="metrics-section-title">Stage 1 — Cost per model</h3>
+                    <div className="metrics-cost-table">
+                      <div className="metrics-cost-table-header">
+                        <span>Model</span>
+                        <span>Avg / run</span>
+                        <span>Total</span>
+                      </div>
+                      {histCostData.map((m) => (
+                        <div key={m.model} className="metrics-cost-table-row">
+                          <span className="metrics-cost-table-model">{m.model}</span>
+                          <span>{formatCost(m.avg_cost)}</span>
+                          <span>{formatCost(m.total_cost)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
                 {histChairman && (
                   <section className="metrics-section">
                     <h3 className="metrics-section-title">
@@ -238,6 +314,7 @@ export default function MetricsModal({ onClose, currentConversation, theme }) {
                       <StatBox label="Avg latency" value={histChairman.avg_latency_ms} unit=" ms" />
                       <StatBox label="Avg input tokens" value={histChairman.avg_prompt_tokens} />
                       <StatBox label="Avg output tokens" value={histChairman.avg_completion_tokens} />
+                      <CostStatBox label="Avg cost" value={histChairman.avg_cost} />
                       <StatBox label="Samples" value={histChairman.sample_count} />
                     </div>
                   </section>

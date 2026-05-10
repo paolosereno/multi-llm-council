@@ -37,6 +37,7 @@ async def stage1_collect_responses(
                 "latency_ms": response.get('latency_ms'),
                 "prompt_tokens": response.get('prompt_tokens'),
                 "completion_tokens": response.get('completion_tokens'),
+                "cost": response.get('cost'),
             })
 
     return stage1_results
@@ -109,6 +110,7 @@ Now provide your evaluation and ranking:"""
                 "latency_ms": response.get('latency_ms'),
                 "prompt_tokens": response.get('prompt_tokens'),
                 "completion_tokens": response.get('completion_tokens'),
+                "cost": response.get('cost'),
             })
 
     return stage2_results, label_to_model
@@ -166,6 +168,7 @@ Provide a clear, well-reasoned final answer that represents the council's collec
         "latency_ms": response.get('latency_ms'),
         "prompt_tokens": response.get('prompt_tokens'),
         "completion_tokens": response.get('completion_tokens'),
+        "cost": response.get('cost'),
     }
 
 

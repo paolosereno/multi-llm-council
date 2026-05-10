@@ -186,7 +186,7 @@ async def get_metrics():
     reset_at = _get_stats_reset_at()
     storage.ensure_data_dir()
 
-    model_data = defaultdict(lambda: {'latencies': [], 'prompt_tokens': [], 'completion_tokens': []})
+    model_data = defaultdict(lambda: {'latencies': [], 'prompt_tokens': [], 'completion_tokens': [], 'costs': []})
     total_runs = 0
 
     for filename in os.listdir(storage.DATA_DIR):
@@ -212,8 +212,9 @@ async def get_metrics():
                     model_data[model]['latencies'].append(result['latency_ms'])
                 if result.get('prompt_tokens') is not None:
                     model_data[model]['prompt_tokens'].append(result['prompt_tokens'])
-                if result.get('completion_tokens') is not None:
                     model_data[model]['completion_tokens'].append(result['completion_tokens'])
+                if result.get('cost') is not None:
+                    model_data[model]['costs'].append(result['cost'])
 
     by_model = []
     for model, d in model_data.items():
@@ -227,12 +228,15 @@ async def get_metrics():
         if d['prompt_tokens']:
             entry['avg_prompt_tokens'] = round(sum(d['prompt_tokens']) / len(d['prompt_tokens']))
             entry['avg_completion_tokens'] = round(sum(d['completion_tokens']) / len(d['completion_tokens']))
+        if d['costs']:
+            entry['avg_cost'] = sum(d['costs']) / len(d['costs'])
+            entry['total_cost'] = sum(d['costs'])
         by_model.append(entry)
 
     by_model.sort(key=lambda x: x.get('avg_latency_ms', 0))
 
     # Aggregate Stage 3 (chairman) data separately
-    s3_data = defaultdict(lambda: {'latencies': [], 'prompt_tokens': [], 'completion_tokens': []})
+    s3_data = defaultdict(lambda: {'latencies': [], 'prompt_tokens': [], 'completion_tokens': [], 'costs': []})
     for filename in os.listdir(storage.DATA_DIR):
         if not filename.endswith('.json'):
             continue
@@ -252,6 +256,8 @@ async def get_metrics():
             if s3.get('prompt_tokens') is not None:
                 s3_data[model]['prompt_tokens'].append(s3['prompt_tokens'])
                 s3_data[model]['completion_tokens'].append(s3['completion_tokens'])
+            if s3.get('cost') is not None:
+                s3_data[model]['costs'].append(s3['cost'])
 
     chairman_stats = []
     for model, d in s3_data.items():
@@ -265,6 +271,9 @@ async def get_metrics():
         if d['prompt_tokens']:
             entry['avg_prompt_tokens'] = round(sum(d['prompt_tokens']) / len(d['prompt_tokens']))
             entry['avg_completion_tokens'] = round(sum(d['completion_tokens']) / len(d['completion_tokens']))
+        if d['costs']:
+            entry['avg_cost'] = sum(d['costs']) / len(d['costs'])
+            entry['total_cost'] = sum(d['costs'])
         chairman_stats.append(entry)
 
     return {'by_model': by_model, 'chairman': chairman_stats, 'total_runs': total_runs}

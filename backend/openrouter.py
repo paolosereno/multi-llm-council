@@ -55,6 +55,7 @@ async def query_model(
                 'latency_ms': latency_ms,
                 'prompt_tokens': usage.get('prompt_tokens'),
                 'completion_tokens': usage.get('completion_tokens'),
+                'cost': usage.get('cost'),
             }
 
     except Exception as e:
