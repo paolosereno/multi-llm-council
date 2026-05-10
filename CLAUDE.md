@@ -118,7 +118,9 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 - Mode is selected per-message in the chat UI (not a global setting)
 - `normal` is the default; other modes require the corresponding model lists to be configured
 - If a model list is empty, falls back to council_models silently
-- Frontend shows ⚠ on mode buttons when the relevant list is empty
+- When an unconfigured mode is selected: the active button turns orange (`.mode-btn-warn`) and an inline warning message appears below the selector explaining the fallback and directing the user to ⚙ Settings
+- Warning logic: Fast → check `emptyLists.fast`; Budget → check `emptyLists.budget`; Hybrid → check `emptyLists.budget` (Stage 2 uses Budget)
+- `emptyLists` state is populated by fetching config on ChatInterface mount
 
 ### Model Selection for Searchable Dropdown
 - Backend proxies `GET https://openrouter.ai/api/v1/models` to avoid exposing API key in frontend
