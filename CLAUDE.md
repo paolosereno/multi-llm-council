@@ -56,7 +56,7 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 - FastAPI app with CORS enabled for localhost:5173 and localhost:3000
 - `SendMessageRequest` includes `execution_mode: str = 'normal'` and a `field_validator` that rejects empty content and messages over 10,000 characters
 - `CouncilConfigRequest` includes `fast_models: List[str] = []` and `budget_models: List[str] = []`
-- `GET /api/models`: proxy to OpenRouter models list, returns `id`, `name`, `pricing` per model
+- `GET /api/models`: proxy to OpenRouter models list, returns `id`, `name`, `description`, `context_length`, `pricing` per model
 - `GET /api/config` / `PUT /api/config`: read/write runtime config including fast/budget model lists
 - `GET /api/stats`: aggregate model performance statistics
 - `GET /api/metrics`: latency, token usage, cost per model (Stage 1 and Stage 3)
@@ -71,6 +71,7 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 - `handleSendMessage(content, systemPrompt, history, executionMode)`: passes executionMode to API
 - `handleRerun(content, systemPrompt, targetIndex, executionMode)`: passes executionMode to API; uses the **currently selected** executionMode in the UI, not the one from the original run
 - `error` event handler in both functions: clears all `loading` flags in the assistant message and sets `streamError` to the error message string; `setIsLoading(false)`
+- `showModels` boolean state: when true renders `ModelsPage` instead of `ChatInterface`
 - Important: metadata is stored in the UI state for display but not persisted to backend JSON
 
 **`api.js`**
@@ -116,10 +117,19 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 - Uses Recharts (BarChart, ResponsiveContainer)
 - `formatCost()`: shows USD values per 1M tokens; shows "free" for 0
 
+**`components/ModelsPage.jsx` + `ModelsPage.css`**
+- Full-page view replacing ChatInterface when active (toggled via ⊟ sidebar button)
+- Fetches all models from `GET /api/models` on mount; shows loading/error states
+- Sortable by name, context length, input price, output price (click column header)
+- Real-time filter by name or ID; result count shown
+- `formatPrice()`: converts per-token price to $/1M; shows "free" for 0
+- `formatContext()`: formats context length as K/M suffix
+
 **Styling (`*.css`)**
 - Light/dark theme via CSS variables (`var(--bg-*)`, `var(--text-*)`, etc.)
 - Primary color: #4a90e2 (blue)
 - Global markdown styling in `index.css` with `.markdown-content` class
+- `.sidebar-btn-active`: blue highlight for active sidebar icon buttons
 
 ## Key Design Decisions
 
@@ -198,6 +208,7 @@ Runtime config is saved to `data/council_config.json`. The file includes all fou
 - Conversation search, delete, Markdown export
 - Per-model timeout (60s via httpx) and per-stage timeout (90s via asyncio.wait_for)
 - Stream error display: inline banner in chat when a stage times out or the stream closes unexpectedly
+- OpenRouter model catalogue page (⊟ button in sidebar): sortable/searchable table with name, ID, context window, input/output pricing
 
 ## Data Flow Summary
 
