@@ -55,6 +55,32 @@ const sections = [
     ),
   },
   {
+    icon: '⚡',
+    title: 'Execution mode',
+    content: (
+      <div>
+        <p style={{ marginBottom: 8 }}>
+          Select <strong>Normal / Fast / Budget / Hybrid</strong> below the message field to control
+          which model list is used for each stage.
+        </p>
+        <table className="help-mode-table">
+          <thead>
+            <tr><th>Mode</th><th>Stage 1</th><th>Stage 2</th><th>Stage 3</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Normal</td><td>Council</td><td>Council</td><td>Chairman</td></tr>
+            <tr><td>Fast</td><td>Fast</td><td>Fast</td><td>Chairman</td></tr>
+            <tr><td>Budget</td><td>Budget</td><td>Budget</td><td>Chairman</td></tr>
+            <tr><td>Hybrid</td><td>Council</td><td>Budget</td><td>Chairman</td></tr>
+          </tbody>
+        </table>
+        <p style={{ marginTop: 8 }}>
+          Model lists are configured in <strong>⚙ Settings</strong>. Empty lists fall back to Council.
+        </p>
+      </div>
+    ),
+  },
+  {
     icon: '↺',
     title: 'Re-run',
     content: (
@@ -80,15 +106,13 @@ const sections = [
     icon: '⚙',
     title: 'Model configuration',
     content: (
-      <>
-        <p>
-          Click <strong>⚙</strong> in the sidebar to open Settings. Type a name or keyword in the
-          search field to find models — a dropdown shows matching results with name, identifier, and
-          pricing (input / output cost per 1M tokens, or <code>free</code>). Select a model to add
-          it to the council, or press <kbd>Enter</kbd> to add an identifier typed manually.
-          Changes take effect immediately without restarting the server.
-        </p>
-      </>
+      <p>
+        Click <strong>⚙</strong> in the sidebar to open Settings. Configure four model lists:
+        <strong> Council</strong>, <strong>Fast</strong>, <strong>Budget</strong>, and <strong>Chairman</strong>.
+        Each list has a search field that fetches the full OpenRouter catalogue with name, ID, and
+        pricing (per 1M tokens). Select from the dropdown or press <kbd>Enter</kbd> to add manually.
+        Changes take effect immediately.
+      </p>
     ),
   },
   {

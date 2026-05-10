@@ -6,12 +6,13 @@
 2. [Sending a message](#sending-a-message)
 3. [System prompt](#system-prompt)
 4. [Multi-turn conversation](#multi-turn-conversation)
-5. [Re-run](#re-run)
-6. [Managing conversations](#managing-conversations)
-7. [Model configuration](#model-configuration)
-8. [Model statistics](#model-statistics)
-9. [Performance metrics](#performance-metrics)
-10. [Light / dark theme](#light--dark-theme)
+5. [Execution mode](#execution-mode)
+6. [Re-run](#re-run)
+7. [Managing conversations](#managing-conversations)
+8. [Model configuration](#model-configuration)
+9. [Model statistics](#model-statistics)
+10. [Performance metrics](#performance-metrics)
+11. [Light / dark theme](#light--dark-theme)
 
 ---
 
@@ -49,6 +50,26 @@ Enable **Include context** below the message field to pass the conversation hist
 
 ---
 
+## ⚡ Execution mode
+
+Select the execution mode using the **Normal / Fast / Budget / Hybrid** buttons below the message field before sending.
+
+| Mode | Stage 1 | Stage 2 | Stage 3 |
+|------|---------|---------|---------|
+| **Normal** | Council models | Council models | Chairman |
+| **Fast** | Fast models | Fast models | Chairman |
+| **Budget** | Budget models | Budget models | Chairman |
+| **Hybrid** | Council models | Budget models | Chairman |
+
+- **Normal** — uses the Council model list for all stages.
+- **Fast** — uses the Fast model list (typically smaller, quicker models) for Stage 1 and Stage 2.
+- **Budget** — uses the Budget model list (cheapest models) for Stage 1 and Stage 2.
+- **Hybrid** — uses Council models for Stage 1 (quality responses) and Budget models for Stage 2 (cheap ranking). Stage 3 always uses the Chairman.
+
+If a model list is empty, the Council list is used as fallback. The Fast, Budget, and Council lists are configured in the **Settings** panel (⚙).
+
+---
+
 ## ↺ Re-run
 
 Click the **↺** button in the header of any completed response to re-run the council on the same question. The previous answer is replaced. The original system prompt is reused automatically.
@@ -67,7 +88,9 @@ Click the **↺** button in the header of any completed response to re-run the c
 
 ## ⚙ Model configuration
 
-Click **⚙** in the sidebar to open Settings. You can add or remove council models and change the Chairman model.
+Click **⚙** in the sidebar to open Settings. The Settings panel has four model lists — **Council**, **Fast**, **Budget**, and **Chairman** — plus a summary table showing which list is used by each execution mode.
+
+
 
 To add a model, start typing a name or keyword in the search field — a dropdown appears with matching models fetched live from OpenRouter. Each entry shows:
 - the model name
