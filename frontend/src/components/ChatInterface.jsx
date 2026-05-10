@@ -227,6 +227,13 @@ export default function ChatInterface({
                     </div>
                   )}
                   {msg.stage3 && <Stage3 finalResponse={msg.stage3} />}
+
+                  {/* Stream error */}
+                  {msg.streamError && (
+                    <div className="stream-error">
+                      ⚠ {msg.streamError}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

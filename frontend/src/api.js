@@ -154,6 +154,7 @@ export const api = {
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
+    let streamEnded = false;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -163,12 +164,17 @@ export const api = {
         if (line.startsWith('data: ')) {
           try {
             const event = JSON.parse(line.slice(6));
+            if (event.type === 'complete' || event.type === 'error') streamEnded = true;
             onEvent(event.type, event);
           } catch (e) {
             console.error('Failed to parse SSE event:', e);
           }
         }
       }
+    }
+
+    if (!streamEnded) {
+      onEvent('error', { type: 'error', message: 'Connection closed unexpectedly.' });
     }
   },
 
@@ -195,25 +201,28 @@ export const api = {
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
+    let streamEnded = false;
 
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
 
       const chunk = decoder.decode(value);
-      const lines = chunk.split('\n');
-
-      for (const line of lines) {
+      for (const line of chunk.split('\n')) {
         if (line.startsWith('data: ')) {
-          const data = line.slice(6);
           try {
-            const event = JSON.parse(data);
+            const event = JSON.parse(line.slice(6));
+            if (event.type === 'complete' || event.type === 'error') streamEnded = true;
             onEvent(event.type, event);
           } catch (e) {
             console.error('Failed to parse SSE event:', e);
           }
         }
       }
+    }
+
+    if (!streamEnded) {
+      onEvent('error', { type: 'error', message: 'Connection closed unexpectedly.' });
     }
   },
 };

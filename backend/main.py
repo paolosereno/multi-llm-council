@@ -11,7 +11,7 @@ import json
 import asyncio
 
 from . import storage
-from .config import get_runtime_config, update_runtime_config
+from .config import get_runtime_config, update_runtime_config, STAGE_TIMEOUT
 from .council import run_full_council, generate_conversation_title, stage1_collect_responses, stage2_collect_rankings, stage3_synthesize_final, calculate_aggregate_rankings
 
 app = FastAPI(title="LLM Council API")
@@ -416,18 +416,39 @@ async def send_message_stream(conversation_id: str, request: SendMessageRequest)
 
             # Stage 1: Collect responses
             yield f"data: {json.dumps({'type': 'stage1_start'})}\n\n"
-            stage1_results = await stage1_collect_responses(request.content, request.system_prompt, request.history, request.execution_mode)
+            try:
+                stage1_results = await asyncio.wait_for(
+                    stage1_collect_responses(request.content, request.system_prompt, request.history, request.execution_mode),
+                    timeout=STAGE_TIMEOUT,
+                )
+            except asyncio.TimeoutError:
+                yield f"data: {json.dumps({'type': 'error', 'message': f'Stage 1 timed out after {STAGE_TIMEOUT}s. Models may be overloaded.'})}\n\n"
+                return
             yield f"data: {json.dumps({'type': 'stage1_complete', 'data': stage1_results})}\n\n"
 
             # Stage 2: Collect rankings
             yield f"data: {json.dumps({'type': 'stage2_start'})}\n\n"
-            stage2_results, label_to_model = await stage2_collect_rankings(request.content, stage1_results, request.system_prompt, request.history, request.execution_mode)
+            try:
+                stage2_results, label_to_model = await asyncio.wait_for(
+                    stage2_collect_rankings(request.content, stage1_results, request.system_prompt, request.history, request.execution_mode),
+                    timeout=STAGE_TIMEOUT,
+                )
+            except asyncio.TimeoutError:
+                yield f"data: {json.dumps({'type': 'error', 'message': f'Stage 2 timed out after {STAGE_TIMEOUT}s. Models may be overloaded.'})}\n\n"
+                return
             aggregate_rankings = calculate_aggregate_rankings(stage2_results, label_to_model)
             yield f"data: {json.dumps({'type': 'stage2_complete', 'data': stage2_results, 'metadata': {'label_to_model': label_to_model, 'aggregate_rankings': aggregate_rankings}})}\n\n"
 
             # Stage 3: Synthesize final answer
             yield f"data: {json.dumps({'type': 'stage3_start'})}\n\n"
-            stage3_result = await stage3_synthesize_final(request.content, stage1_results, stage2_results, request.system_prompt, request.history)
+            try:
+                stage3_result = await asyncio.wait_for(
+                    stage3_synthesize_final(request.content, stage1_results, stage2_results, request.system_prompt, request.history),
+                    timeout=STAGE_TIMEOUT,
+                )
+            except asyncio.TimeoutError:
+                yield f"data: {json.dumps({'type': 'error', 'message': f'Stage 3 timed out after {STAGE_TIMEOUT}s. The chairman model may be overloaded.'})}\n\n"
+                return
             yield f"data: {json.dumps({'type': 'stage3_complete', 'data': stage3_result})}\n\n"
 
             # Wait for title generation if it was started
@@ -473,16 +494,37 @@ async def rerun_message(conversation_id: str, request: SendMessageRequest):
     async def event_generator():
         try:
             yield f"data: {json.dumps({'type': 'stage1_start'})}\n\n"
-            stage1_results = await stage1_collect_responses(request.content, request.system_prompt, execution_mode=request.execution_mode)
+            try:
+                stage1_results = await asyncio.wait_for(
+                    stage1_collect_responses(request.content, request.system_prompt, execution_mode=request.execution_mode),
+                    timeout=STAGE_TIMEOUT,
+                )
+            except asyncio.TimeoutError:
+                yield f"data: {json.dumps({'type': 'error', 'message': f'Stage 1 timed out after {STAGE_TIMEOUT}s. Models may be overloaded.'})}\n\n"
+                return
             yield f"data: {json.dumps({'type': 'stage1_complete', 'data': stage1_results})}\n\n"
 
             yield f"data: {json.dumps({'type': 'stage2_start'})}\n\n"
-            stage2_results, label_to_model = await stage2_collect_rankings(request.content, stage1_results, request.system_prompt, execution_mode=request.execution_mode)
+            try:
+                stage2_results, label_to_model = await asyncio.wait_for(
+                    stage2_collect_rankings(request.content, stage1_results, request.system_prompt, execution_mode=request.execution_mode),
+                    timeout=STAGE_TIMEOUT,
+                )
+            except asyncio.TimeoutError:
+                yield f"data: {json.dumps({'type': 'error', 'message': f'Stage 2 timed out after {STAGE_TIMEOUT}s. Models may be overloaded.'})}\n\n"
+                return
             aggregate_rankings = calculate_aggregate_rankings(stage2_results, label_to_model)
             yield f"data: {json.dumps({'type': 'stage2_complete', 'data': stage2_results, 'metadata': {'label_to_model': label_to_model, 'aggregate_rankings': aggregate_rankings}})}\n\n"
 
             yield f"data: {json.dumps({'type': 'stage3_start'})}\n\n"
-            stage3_result = await stage3_synthesize_final(request.content, stage1_results, stage2_results, request.system_prompt)
+            try:
+                stage3_result = await asyncio.wait_for(
+                    stage3_synthesize_final(request.content, stage1_results, stage2_results, request.system_prompt),
+                    timeout=STAGE_TIMEOUT,
+                )
+            except asyncio.TimeoutError:
+                yield f"data: {json.dumps({'type': 'error', 'message': f'Stage 3 timed out after {STAGE_TIMEOUT}s. The chairman model may be overloaded.'})}\n\n"
+                return
             yield f"data: {json.dumps({'type': 'stage3_complete', 'data': stage3_result})}\n\n"
 
             storage.replace_last_assistant_message(conversation_id, stage1_results, stage2_results, stage3_result)

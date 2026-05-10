@@ -18,6 +18,9 @@ CHAIRMAN_MODEL = "x-ai/grok-4.1-fast"
 
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
+MODEL_TIMEOUT = 60   # seconds: httpx timeout per individual model request
+STAGE_TIMEOUT = 90   # seconds: asyncio.wait_for safety cap per stage
+
 DATA_DIR = "data/conversations"
 
 _runtime_config = None

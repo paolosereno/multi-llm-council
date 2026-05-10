@@ -3,13 +3,13 @@
 import time
 import httpx
 from typing import List, Dict, Any, Optional
-from .config import OPENROUTER_API_KEY, OPENROUTER_API_URL
+from .config import OPENROUTER_API_KEY, OPENROUTER_API_URL, MODEL_TIMEOUT
 
 
 async def query_model(
     model: str,
     messages: List[Dict[str, str]],
-    timeout: float = 120.0
+    timeout: float = MODEL_TIMEOUT
 ) -> Optional[Dict[str, Any]]:
     """
     Query a single model via OpenRouter API.

@@ -372,3 +372,20 @@
   background: var(--border-subtle);
   border-color: var(--border-subtle);
 }
+
+.stream-error {
+  margin: 8px 0;
+  padding: 10px 14px;
+  background: #fff0f0;
+  border: 1px solid #e74c3c;
+  border-radius: 6px;
+  color: #c0392b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+[data-theme='dark'] .stream-error {
+  background: #2a0000;
+  border-color: #7a2020;
+  color: #e57373;
+}

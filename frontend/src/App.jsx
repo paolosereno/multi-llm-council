@@ -142,6 +142,15 @@ function App() {
             break;
           case 'error':
             console.error('Re-run error:', event.message);
+            setCurrentConversation((prev) => {
+              const messages = [...prev.messages];
+              messages[targetIndex] = {
+                ...messages[targetIndex],
+                loading: { stage1: false, stage2: false, stage3: false },
+                streamError: event.message,
+              };
+              return { ...prev, messages };
+            });
             setIsLoading(false);
             break;
           default:
@@ -260,6 +269,16 @@ function App() {
 
           case 'error':
             console.error('Stream error:', event.message);
+            setCurrentConversation((prev) => {
+              const messages = [...prev.messages];
+              const lastMsg = {
+                ...messages[messages.length - 1],
+                loading: { stage1: false, stage2: false, stage3: false },
+                streamError: event.message,
+              };
+              messages[messages.length - 1] = lastMsg;
+              return { ...prev, messages };
+            });
             setIsLoading(false);
             break;
 
