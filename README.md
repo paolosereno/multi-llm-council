@@ -31,6 +31,7 @@ This is a fork of [karpathy/llm-council](https://github.com/karpathy/llm-council
 *Quick Reference panel — Stage 2 peer rankings and aggregate model rankings visible in the background*
 
 ![Screenshot 3](screenshot3.jpg)
+
 *Council Settings — execution modes overview and model list configuration (Fast, Budget, Chairman)*
 
 ![Screenshot 4](screenshot4.jpg)
