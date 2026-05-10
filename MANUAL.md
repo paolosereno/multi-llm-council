@@ -66,7 +66,7 @@ Select the execution mode using the **Normal / Fast / Budget / Hybrid** buttons 
 - **Budget** — uses the Budget model list (cheapest models) for Stage 1 and Stage 2.
 - **Hybrid** — uses Council models for Stage 1 (quality responses) and Budget models for Stage 2 (cheap ranking). Stage 3 always uses the Chairman.
 
-If a model list is empty, the Council list is used as fallback. The Fast, Budget, and Council lists are configured in the **Settings** panel (⚙).
+If a model list is empty, the Council list is used as fallback. When you select a mode with an unconfigured list, the button turns orange and a warning message appears below the selector explaining the fallback and linking to ⚙ Settings. The Fast, Budget, and Council lists are configured in the **Settings** panel (⚙).
 
 ---
 

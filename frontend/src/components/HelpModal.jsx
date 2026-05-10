@@ -75,7 +75,9 @@ const sections = [
           </tbody>
         </table>
         <p style={{ marginTop: 8 }}>
-          Model lists are configured in <strong>⚙ Settings</strong>. Empty lists fall back to Council.
+          If a list is empty, Council models are used as fallback. Selecting a mode with an
+          unconfigured list turns the button orange and shows a warning message below the selector.
+          Configure the lists in <strong>⚙ Settings</strong>.
         </p>
       </div>
     ),
