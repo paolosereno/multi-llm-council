@@ -77,8 +77,12 @@ function ModelComboBox({ availableModels, value, onChange, onSelect, placeholder
 
 export default function SettingsModal({ onClose }) {
   const [councilModels, setCouncilModels] = useState([]);
+  const [fastModels, setFastModels] = useState([]);
+  const [budgetModels, setBudgetModels] = useState([]);
   const [chairmanModel, setChairmanModel] = useState('');
   const [newModel, setNewModel] = useState('');
+  const [newFastModel, setNewFastModel] = useState('');
+  const [newBudgetModel, setNewBudgetModel] = useState('');
   const [availableModels, setAvailableModels] = useState([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -86,6 +90,8 @@ export default function SettingsModal({ onClose }) {
   useEffect(() => {
     api.getConfig().then((config) => {
       setCouncilModels(config.council_models);
+      setFastModels(config.fast_models || []);
+      setBudgetModels(config.budget_models || []);
       setChairmanModel(config.chairman_model);
       setLoading(false);
     });
@@ -94,22 +100,31 @@ export default function SettingsModal({ onClose }) {
       .catch(() => {});
   }, []);
 
-  const handleAddModel = (id) => {
-    const trimmed = (typeof id === 'string' ? id : newModel).trim();
-    if (trimmed && !councilModels.includes(trimmed)) {
-      setCouncilModels([...councilModels, trimmed]);
-      setNewModel('');
+  const makeAdder = (list, setList, setNew) => (id) => {
+    const trimmed = (typeof id === 'string' ? id : '').trim() || '';
+    if (trimmed && !list.includes(trimmed)) {
+      setList([...list, trimmed]);
+      setNew('');
     }
   };
 
-  const handleRemoveModel = (index) => {
-    setCouncilModels(councilModels.filter((_, i) => i !== index));
-  };
+  const handleAddModel = makeAdder(councilModels, setCouncilModels, setNewModel);
+  const handleAddFast = makeAdder(fastModels, setFastModels, setNewFastModel);
+  const handleAddBudget = makeAdder(budgetModels, setBudgetModels, setNewBudgetModel);
+
+  const handleRemoveModel = (index) => setCouncilModels(councilModels.filter((_, i) => i !== index));
+  const handleRemoveFast = (index) => setFastModels(fastModels.filter((_, i) => i !== index));
+  const handleRemoveBudget = (index) => setBudgetModels(budgetModels.filter((_, i) => i !== index));
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      await api.updateConfig({ council_models: councilModels, chairman_model: chairmanModel });
+      await api.updateConfig({
+        council_models: councilModels,
+        chairman_model: chairmanModel,
+        fast_models: fastModels,
+        budget_models: budgetModels,
+      });
       onClose();
     } catch (e) {
       console.error('Failed to save config:', e);
@@ -158,6 +173,75 @@ export default function SettingsModal({ onClose }) {
                 <button className="model-add-btn" onClick={handleAddModel}>
                   Add
                 </button>
+              </div>
+            </section>
+
+            <section className="settings-section">
+              <h3>Execution Modes</h3>
+              <table className="mode-table">
+                <thead>
+                  <tr>
+                    <th>Mode</th>
+                    <th>Stage 1</th>
+                    <th>Stage 2</th>
+                    <th>Stage 3</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Normal</td><td>Council</td><td>Council</td><td>Chairman</td></tr>
+                  <tr><td>Fast</td><td>Fast</td><td>Fast</td><td>Chairman</td></tr>
+                  <tr><td>Budget</td><td>Budget</td><td>Budget</td><td>Chairman</td></tr>
+                  <tr><td>Hybrid</td><td>Council</td><td>Budget</td><td>Chairman</td></tr>
+                </tbody>
+              </table>
+              <p className="settings-section-hint">If a list is empty, Normal models are used as fallback.</p>
+            </section>
+
+            <section className="settings-section">
+              <h3>Fast Models</h3>
+              <p className="settings-section-hint">Used in Fast mode (Stage 1 &amp; 2). Falls back to Normal if empty.</p>
+              <div className="model-list">
+                {fastModels.map((model, i) => (
+                  <div key={i} className="model-item">
+                    <span className="model-item-name">{model}</span>
+                    <button className="model-remove-btn" onClick={() => handleRemoveFast(i)} title="Remove model">×</button>
+                  </div>
+                ))}
+              </div>
+              <div className="model-add-row">
+                <ModelComboBox
+                  availableModels={availableModels}
+                  value={newFastModel}
+                  onChange={setNewFastModel}
+                  onSelect={handleAddFast}
+                  placeholder="Search models…"
+                  className="model-add-input"
+                />
+                <button className="model-add-btn" onClick={handleAddFast}>Add</button>
+              </div>
+            </section>
+
+            <section className="settings-section">
+              <h3>Budget Models</h3>
+              <p className="settings-section-hint">Used in Budget mode (Stage 1 &amp; 2) and Hybrid mode (Stage 2). Falls back to Normal if empty.</p>
+              <div className="model-list">
+                {budgetModels.map((model, i) => (
+                  <div key={i} className="model-item">
+                    <span className="model-item-name">{model}</span>
+                    <button className="model-remove-btn" onClick={() => handleRemoveBudget(i)} title="Remove model">×</button>
+                  </div>
+                ))}
+              </div>
+              <div className="model-add-row">
+                <ModelComboBox
+                  availableModels={availableModels}
+                  value={newBudgetModel}
+                  onChange={setNewBudgetModel}
+                  onSelect={handleAddBudget}
+                  placeholder="Search models…"
+                  className="model-add-input"
+                />
+                <button className="model-add-btn" onClick={handleAddBudget}>Add</button>
               </div>
             </section>
 

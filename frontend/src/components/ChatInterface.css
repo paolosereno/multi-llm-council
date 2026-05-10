@@ -231,6 +231,33 @@
   color: var(--primary);
 }
 
+.mode-selector {
+  display: flex;
+  gap: 4px;
+}
+
+.mode-btn {
+  padding: 3px 10px;
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.mode-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
 .system-prompt-input {
   width: 100%;
   padding: 10px 12px;

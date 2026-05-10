@@ -68,6 +68,7 @@ export default function ChatInterface({
   const [systemPrompt, setSystemPrompt] = useState('');
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
   const [includeContext, setIncludeContext] = useState(false);
+  const [executionMode, setExecutionMode] = useState('normal');
   const messagesEndRef = useRef(null);
 
   const buildHistory = () => {
@@ -94,7 +95,7 @@ export default function ChatInterface({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (input.trim() && !isLoading) {
-      onSendMessage(input, systemPrompt || null, buildHistory());
+      onSendMessage(input, systemPrompt || null, buildHistory(), executionMode);
       setInput('');
     }
   };
@@ -174,7 +175,7 @@ export default function ChatInterface({
                         disabled={isLoading}
                         onClick={() => {
                           const userMsg = index > 0 ? conversation.messages[index - 1] : null;
-                          onRerun(userMsg?.content, userMsg?.system_prompt || null, index);
+                          onRerun(userMsg?.content, userMsg?.system_prompt || null, index, executionMode);
                         }}
                       >
                         ↺ Re-run
@@ -250,6 +251,18 @@ export default function ChatInterface({
               >
                 Include context
               </button>
+            </div>
+            <div className="mode-selector">
+              {['normal', 'fast', 'budget', 'hybrid'].map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  className={`mode-btn ${executionMode === mode ? 'active' : ''}`}
+                  onClick={() => setExecutionMode(mode)}
+                >
+                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                </button>
+              ))}
             </div>
             {showSystemPrompt && (
               <textarea

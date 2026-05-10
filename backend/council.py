@@ -5,6 +5,21 @@ from .openrouter import query_models_parallel, query_model
 from .config import get_runtime_config
 
 
+def _models_for_stage(execution_mode: str, stage: int) -> List[str]:
+    config = get_runtime_config()
+    normal = config['council_models']
+    fast = config.get('fast_models') or normal
+    budget = config.get('budget_models') or normal
+
+    if execution_mode == 'fast':
+        return fast
+    if execution_mode == 'budget':
+        return budget
+    if execution_mode == 'hybrid':
+        return normal if stage == 1 else budget
+    return normal
+
+
 def _build_messages(
     user_query: str,
     system_prompt: Optional[str] = None,
@@ -23,8 +38,9 @@ async def stage1_collect_responses(
     user_query: str,
     system_prompt: Optional[str] = None,
     history: Optional[List[Dict]] = None,
+    execution_mode: str = 'normal',
 ) -> List[Dict[str, Any]]:
-    council_models = get_runtime_config()['council_models']
+    council_models = _models_for_stage(execution_mode, 1)
     messages = _build_messages(user_query, system_prompt, history)
     responses = await query_models_parallel(council_models, messages)
 
@@ -48,8 +64,9 @@ async def stage2_collect_rankings(
     stage1_results: List[Dict[str, Any]],
     system_prompt: Optional[str] = None,
     history: Optional[List[Dict]] = None,
+    execution_mode: str = 'normal',
 ) -> Tuple[List[Dict[str, Any]], Dict[str, str]]:
-    council_models = get_runtime_config()['council_models']
+    council_models = _models_for_stage(execution_mode, 2)
 
     labels = [chr(65 + i) for i in range(len(stage1_results))]
 
@@ -240,8 +257,9 @@ async def run_full_council(
     user_query: str,
     system_prompt: Optional[str] = None,
     history: Optional[List[Dict]] = None,
+    execution_mode: str = 'normal',
 ) -> Tuple[List, List, Dict, Dict]:
-    stage1_results = await stage1_collect_responses(user_query, system_prompt, history)
+    stage1_results = await stage1_collect_responses(user_query, system_prompt, history, execution_mode)
 
     if not stage1_results:
         return [], [], {
@@ -250,7 +268,7 @@ async def run_full_council(
         }, {}
 
     stage2_results, label_to_model = await stage2_collect_rankings(
-        user_query, stage1_results, system_prompt, history
+        user_query, stage1_results, system_prompt, history, execution_mode
     )
 
     aggregate_rankings = calculate_aggregate_rankings(stage2_results, label_to_model)

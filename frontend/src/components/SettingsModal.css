@@ -66,6 +66,40 @@
   gap: 24px;
 }
 
+.settings-section-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: -6px 0 10px 0;
+}
+
+.mode-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.mode-table th,
+.mode-table td {
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.mode-table th {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.mode-table td:first-child {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mode-table td {
+  color: var(--text-muted);
+}
+
 .settings-section h3 {
   font-size: 13px;
   font-weight: 600;

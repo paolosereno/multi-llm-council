@@ -36,11 +36,14 @@ class SendMessageRequest(BaseModel):
     content: str
     system_prompt: Optional[str] = None
     history: Optional[List[Dict[str, str]]] = None
+    execution_mode: str = 'normal'
 
 
 class CouncilConfigRequest(BaseModel):
     council_models: List[str]
     chairman_model: str
+    fast_models: List[str] = []
+    budget_models: List[str] = []
 
 
 class ConversationMetadata(BaseModel):
@@ -316,7 +319,12 @@ async def get_config():
 @app.put("/api/config")
 async def set_config(request: CouncilConfigRequest):
     """Update council configuration."""
-    return update_runtime_config(request.council_models, request.chairman_model)
+    return update_runtime_config(
+        request.council_models,
+        request.chairman_model,
+        request.fast_models,
+        request.budget_models,
+    )
 
 
 @app.delete("/api/conversations/{conversation_id}")
@@ -398,12 +406,12 @@ async def send_message_stream(conversation_id: str, request: SendMessageRequest)
 
             # Stage 1: Collect responses
             yield f"data: {json.dumps({'type': 'stage1_start'})}\n\n"
-            stage1_results = await stage1_collect_responses(request.content, request.system_prompt, request.history)
+            stage1_results = await stage1_collect_responses(request.content, request.system_prompt, request.history, request.execution_mode)
             yield f"data: {json.dumps({'type': 'stage1_complete', 'data': stage1_results})}\n\n"
 
             # Stage 2: Collect rankings
             yield f"data: {json.dumps({'type': 'stage2_start'})}\n\n"
-            stage2_results, label_to_model = await stage2_collect_rankings(request.content, stage1_results, request.system_prompt, request.history)
+            stage2_results, label_to_model = await stage2_collect_rankings(request.content, stage1_results, request.system_prompt, request.history, request.execution_mode)
             aggregate_rankings = calculate_aggregate_rankings(stage2_results, label_to_model)
             yield f"data: {json.dumps({'type': 'stage2_complete', 'data': stage2_results, 'metadata': {'label_to_model': label_to_model, 'aggregate_rankings': aggregate_rankings}})}\n\n"
 
@@ -455,11 +463,11 @@ async def rerun_message(conversation_id: str, request: SendMessageRequest):
     async def event_generator():
         try:
             yield f"data: {json.dumps({'type': 'stage1_start'})}\n\n"
-            stage1_results = await stage1_collect_responses(request.content, request.system_prompt)
+            stage1_results = await stage1_collect_responses(request.content, request.system_prompt, execution_mode=request.execution_mode)
             yield f"data: {json.dumps({'type': 'stage1_complete', 'data': stage1_results})}\n\n"
 
             yield f"data: {json.dumps({'type': 'stage2_start'})}\n\n"
-            stage2_results, label_to_model = await stage2_collect_rankings(request.content, stage1_results, request.system_prompt)
+            stage2_results, label_to_model = await stage2_collect_rankings(request.content, stage1_results, request.system_prompt, execution_mode=request.execution_mode)
             aggregate_rankings = calculate_aggregate_rankings(stage2_results, label_to_model)
             yield f"data: {json.dumps({'type': 'stage2_complete', 'data': stage2_results, 'metadata': {'label_to_model': label_to_model, 'aggregate_rankings': aggregate_rankings}})}\n\n"
 

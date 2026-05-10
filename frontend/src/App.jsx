@@ -78,7 +78,7 @@ function App() {
     }
   };
 
-  const handleRerun = async (content, systemPrompt, targetIndex) => {
+  const handleRerun = async (content, systemPrompt, targetIndex, executionMode = 'normal') => {
     if (!currentConversationId) return;
     setIsLoading(true);
 
@@ -93,7 +93,7 @@ function App() {
     });
 
     try {
-      await api.rerunStream(currentConversationId, content, systemPrompt, (eventType, event) => {
+      await api.rerunStream(currentConversationId, content, systemPrompt, executionMode, (eventType, event) => {
         switch (eventType) {
           case 'stage1_start':
             setCurrentConversation((prev) => {
@@ -154,7 +154,7 @@ function App() {
     }
   };
 
-  const handleSendMessage = async (content, systemPrompt = null, history = null) => {
+  const handleSendMessage = async (content, systemPrompt = null, history = null, executionMode = 'normal') => {
     if (!currentConversationId) return;
 
     setIsLoading(true);
@@ -187,7 +187,7 @@ function App() {
       }));
 
       // Send message with streaming
-      await api.sendMessageStream(currentConversationId, content, systemPrompt, history, (eventType, event) => {
+      await api.sendMessageStream(currentConversationId, content, systemPrompt, history, executionMode, (eventType, event) => {
         switch (eventType) {
           case 'stage1_start':
             setCurrentConversation((prev) => {

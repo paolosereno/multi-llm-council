@@ -41,15 +41,26 @@ def get_runtime_config():
             _runtime_config = {
                 "council_models": list(COUNCIL_MODELS),
                 "chairman_model": CHAIRMAN_MODEL,
+                "fast_models": [],
+                "budget_models": [],
             }
+        _runtime_config.setdefault("fast_models", [])
+        _runtime_config.setdefault("budget_models", [])
     return _runtime_config
 
 
-def update_runtime_config(council_models: list, chairman_model: str) -> dict:
+def update_runtime_config(
+    council_models: list,
+    chairman_model: str,
+    fast_models: list | None = None,
+    budget_models: list | None = None,
+) -> dict:
     global _runtime_config
     _runtime_config = {
         "council_models": council_models,
         "chairman_model": chairman_model,
+        "fast_models": fast_models if fast_models is not None else [],
+        "budget_models": budget_models if budget_models is not None else [],
     }
     path = _config_path()
     os.makedirs(os.path.dirname(path), exist_ok=True)

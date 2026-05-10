@@ -136,9 +136,10 @@ export const api = {
    * @param {function} onEvent - Callback function for each event: (eventType, data) => void
    * @returns {Promise<void>}
    */
-  async rerunStream(conversationId, content, systemPrompt, onEvent) {
+  async rerunStream(conversationId, content, systemPrompt, executionMode, onEvent) {
     const body = { content };
     if (systemPrompt) body.system_prompt = systemPrompt;
+    if (executionMode) body.execution_mode = executionMode;
 
     const response = await fetch(
       `${API_BASE}/api/conversations/${conversationId}/message/rerun`,
@@ -171,10 +172,11 @@ export const api = {
     }
   },
 
-  async sendMessageStream(conversationId, content, systemPrompt, history, onEvent) {
+  async sendMessageStream(conversationId, content, systemPrompt, history, executionMode, onEvent) {
     const body = { content };
     if (systemPrompt) body.system_prompt = systemPrompt;
     if (history?.length) body.history = history;
+    if (executionMode) body.execution_mode = executionMode;
 
     const response = await fetch(
       `${API_BASE}/api/conversations/${conversationId}/message/stream`,
