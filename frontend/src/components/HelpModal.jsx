@@ -3,54 +3,54 @@ import './HelpModal.css';
 const sections = [
   {
     icon: '⚡',
-    title: 'Come funziona',
+    title: 'How it works',
     content: (
       <div className="help-stages">
         <div className="help-stage">
           <span className="help-stage-badge">Stage 1</span>
-          <span>Tutti i modelli ricevono la domanda in parallelo e producono una risposta indipendente.</span>
+          <span>All models receive the question in parallel and produce an independent response.</span>
         </div>
         <div className="help-stage">
           <span className="help-stage-badge">Stage 2</span>
-          <span>Ogni modello legge le risposte degli altri (anonimizzate come "Response A, B…") e le classifica. Questo impedisce favoritismi.</span>
+          <span>Each model reads the others' responses (anonymized as "Response A, B…") and ranks them. This prevents favoritism.</span>
         </div>
         <div className="help-stage">
           <span className="help-stage-badge">Stage 3</span>
-          <span>Il Chairman legge tutto e produce la risposta finale sintetizzata.</span>
+          <span>The Chairman reads everything and produces the final synthesized answer.</span>
         </div>
       </div>
     ),
   },
   {
     icon: '⌨️',
-    title: 'Inviare un messaggio',
+    title: 'Sending a message',
     content: (
       <ul className="help-list">
-        <li><kbd>Enter</kbd> — invia il messaggio</li>
-        <li><kbd>Shift</kbd> + <kbd>Enter</kbd> — va a capo senza inviare</li>
-        <li>Clicca <strong>+ New Conversation</strong> nella sidebar per iniziare una nuova chat.</li>
+        <li><kbd>Enter</kbd> — send the message</li>
+        <li><kbd>Shift</kbd> + <kbd>Enter</kbd> — new line without sending</li>
+        <li>Click <strong>+ New Conversation</strong> in the sidebar to start a new chat.</li>
       </ul>
     ),
   },
   {
     icon: '📋',
-    title: 'Prompt di sistema',
+    title: 'System prompt',
     content: (
       <p>
-        Clicca su <strong>System prompt</strong> sopra il campo messaggio per aggiungere istruzioni globali
-        (es. lingua, ruolo, vincoli). Il simbolo <strong>●</strong> indica che il prompt è attivo.
-        Viene applicato a tutti e tre gli stage e preservato durante il Re-run.
+        Click <strong>System prompt</strong> above the message field to add global instructions
+        (e.g. language, role, constraints). The <strong>●</strong> indicator shows when a prompt is active.
+        It is applied to all three stages and preserved during Re-run.
       </p>
     ),
   },
   {
     icon: '🔄',
-    title: 'Conversazione multi-turno',
+    title: 'Multi-turn conversation',
     content: (
       <p>
-        Attiva <strong>Include context</strong> sotto il campo messaggio per passare la history della
-        conversazione (domande + risposte Stage 3) a tutti gli stage. Utile per domande di
-        follow-up. Lascialo disattivato per domande indipendenti (consuma meno token).
+        Enable <strong>Include context</strong> below the message field to pass the conversation
+        history (questions + Stage 3 answers) to all stages. Useful for follow-up questions.
+        Leave it off for independent queries (uses fewer tokens).
       </p>
     ),
   },
@@ -59,52 +59,63 @@ const sections = [
     title: 'Re-run',
     content: (
       <p>
-        Clicca il pulsante <strong>↺</strong> nell'intestazione di qualsiasi risposta completata per
-        rieseguire il council sulla stessa domanda. La risposta precedente viene sostituita.
-        Il system prompt originale viene riutilizzato automaticamente.
+        Click the <strong>↺</strong> button in the header of any completed response to re-run
+        the council on the same question. The previous answer is replaced.
+        The original system prompt is reused automatically.
       </p>
     ),
   },
   {
     icon: '💬',
-    title: 'Gestione conversazioni',
+    title: 'Managing conversations',
     content: (
       <ul className="help-list">
-        <li>Cerca per titolo nel campo <strong>Search</strong> della sidebar — il filtro è in tempo reale.</li>
-        <li>Clicca <strong>×</strong> accanto a una conversazione per eliminarla.</li>
-        <li>Clicca <strong>Export MD</strong> nella barra superiore per scaricare la conversazione come file Markdown.</li>
+        <li>Search by title in the <strong>Search</strong> field in the sidebar — filters in real time.</li>
+        <li>Click <strong>×</strong> next to a conversation to delete it.</li>
+        <li>Click <strong>Export MD</strong> in the top bar to download the conversation as a Markdown file.</li>
       </ul>
     ),
   },
   {
     icon: '⚙',
-    title: 'Configurazione modelli',
+    title: 'Model configuration',
     content: (
       <p>
-        Clicca su <strong>⚙</strong> nella sidebar per aprire le Impostazioni. Puoi aggiungere o
-        rimuovere modelli del council e cambiare il Chairman inserendo l'identificatore OpenRouter
-        (es. <code>openai/gpt-4.1</code>). Le modifiche hanno effetto immediato senza riavviare il server.
+        Click <strong>⚙</strong> in the sidebar to open Settings. You can add or remove council
+        models and change the Chairman by entering an OpenRouter model identifier
+        (e.g. <code>openai/gpt-4.1</code>). Changes take effect immediately without restarting the server.
       </p>
     ),
   },
   {
     icon: '▤',
-    title: 'Statistiche modelli',
+    title: 'Model statistics',
     content: (
       <p>
-        Clicca su <strong>▤</strong> per vedere le performance storiche di ogni modello: posizione
-        media nelle classifiche peer, numero di vittorie e win rate. Usa <strong>Reset Stats</strong> per
-        azzerare il conteggio e ricominciare da ora.
+        Click <strong>▤</strong> to view each model's historical performance: average rank in peer
+        evaluations, win count, and win rate. Use <strong>Reset Stats</strong> to clear the counters
+        and start fresh from now.
+      </p>
+    ),
+  },
+  {
+    icon: '~',
+    title: 'Performance metrics',
+    content: (
+      <p>
+        Click <strong>~</strong> to open the metrics dashboard. The <em>Latest run</em> tab shows
+        latency, token usage, and cost per model for the most recent council run.
+        The <em>Historical</em> tab shows aggregated averages across all stored runs.
       </p>
     ),
   },
   {
     icon: '☀',
-    title: 'Tema chiaro / scuro',
+    title: 'Light / dark theme',
     content: (
       <p>
-        Clicca su <strong>☾</strong> (o <strong>☀</strong>) in cima alla sidebar per alternare
-        tra tema chiaro e scuro. La preferenza viene salvata nel browser.
+        Click <strong>☾</strong> (or <strong>☀</strong>) at the top of the sidebar to toggle
+        between light and dark theme. The preference is saved in the browser.
       </p>
     ),
   },
@@ -115,7 +126,7 @@ export default function HelpModal({ onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content help-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Guida rapida</h2>
+          <h2>Quick reference</h2>
           <button className="modal-close-btn" onClick={onClose}>×</button>
         </div>
 
@@ -132,7 +143,7 @@ export default function HelpModal({ onClose }) {
         </div>
 
         <div className="modal-footer">
-          <button className="modal-cancel-btn" onClick={onClose}>Chiudi</button>
+          <button className="modal-cancel-btn" onClick={onClose}>Close</button>
         </div>
       </div>
     </div>
