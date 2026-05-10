@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
+import os
 import uuid
 import json
 import asyncio
@@ -85,6 +86,68 @@ async def get_conversation(conversation_id: str):
     if conversation is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return conversation
+
+
+@app.get("/api/stats")
+async def get_stats():
+    """Aggregate model performance statistics across all stored conversations."""
+    from collections import defaultdict
+    from .council import parse_ranking_from_text
+
+    storage.ensure_data_dir()
+    model_stats = defaultdict(lambda: {'appearances': 0, 'rankings_received': 0, 'rank_sum': 0, 'wins': 0})
+    total_runs = 0
+
+    for filename in os.listdir(storage.DATA_DIR):
+        if not filename.endswith('.json'):
+            continue
+        conv = storage.get_conversation(filename[:-5])
+        if conv is None:
+            continue
+
+        for msg in conv.get('messages', []):
+            if msg.get('role') != 'assistant':
+                continue
+            stage1 = msg.get('stage1') or []
+            stage2 = msg.get('stage2') or []
+            if not stage1 or not stage2:
+                continue
+
+            total_runs += 1
+
+            for result in stage1:
+                model_stats[result['model']]['appearances'] += 1
+
+            label_to_model = {
+                f"Response {chr(65 + i)}": result['model']
+                for i, result in enumerate(stage1)
+            }
+
+            for ranking in stage2:
+                parsed = parse_ranking_from_text(ranking.get('ranking', ''))
+                for pos, label in enumerate(parsed, start=1):
+                    if label in label_to_model:
+                        model = label_to_model[label]
+                        model_stats[model]['rankings_received'] += 1
+                        model_stats[model]['rank_sum'] += pos
+                        if pos == 1:
+                            model_stats[model]['wins'] += 1
+
+    stats = []
+    for model, s in model_stats.items():
+        rc = s['rankings_received']
+        stats.append({
+            'model': model,
+            'appearances': s['appearances'],
+            'rankings_received': rc,
+            'average_rank': round(s['rank_sum'] / rc, 2) if rc > 0 else None,
+            'wins': s['wins'],
+            'win_rate': round(s['wins'] / rc, 2) if rc > 0 else 0,
+        })
+
+    stats.sort(key=lambda x: (x['average_rank'] or 999))
+
+    return {'models': stats, 'total_council_runs': total_runs}
 
 
 @app.get("/api/config")

@@ -47,6 +47,15 @@ export const api = {
   },
 
   /**
+   * Get aggregate model performance statistics.
+   */
+  async getStats() {
+    const response = await fetch(`${API_BASE}/api/stats`);
+    if (!response.ok) throw new Error('Failed to get stats');
+    return response.json();
+  },
+
+  /**
    * Get council configuration.
    */
   async getConfig() {
