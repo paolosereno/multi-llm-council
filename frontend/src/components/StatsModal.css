@@ -70,3 +70,29 @@
   font-weight: 600;
   color: var(--primary-dim);
 }
+
+.stats-since {
+  color: var(--text-muted);
+}
+
+.stats-reset-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.stats-reset-btn:hover:not(:disabled) {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.stats-reset-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

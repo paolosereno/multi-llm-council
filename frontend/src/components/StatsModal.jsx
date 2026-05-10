@@ -5,13 +5,32 @@ import './StatsModal.css';
 export default function StatsModal({ onClose }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [resetting, setResetting] = useState(false);
 
-  useEffect(() => {
+  const loadStats = () => {
+    setLoading(true);
     api.getStats().then((data) => {
       setStats(data);
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { loadStats(); }, []);
+
+  const handleReset = async () => {
+    setResetting(true);
+    try {
+      await api.resetStats();
+      await loadStats();
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  const formatDate = (iso) => {
+    if (!iso) return null;
+    return new Date(iso + 'Z').toLocaleString();
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -29,6 +48,9 @@ export default function StatsModal({ onClose }) {
           <div className="modal-body">
             <p className="stats-summary">
               Based on <strong>{stats.total_council_runs}</strong> council run{stats.total_council_runs !== 1 ? 's' : ''}
+              {stats.reset_at && (
+                <span className="stats-since"> — since {formatDate(stats.reset_at)}</span>
+              )}
             </p>
 
             {stats.models.length === 0 ? (
@@ -67,6 +89,14 @@ export default function StatsModal({ onClose }) {
         )}
 
         <div className="modal-footer">
+          <button
+            className="stats-reset-btn"
+            onClick={handleReset}
+            disabled={resetting || loading}
+            title="Ignore all previous runs and start counting from now"
+          >
+            {resetting ? 'Resetting...' : 'Reset Stats'}
+          </button>
           <button className="modal-cancel-btn" onClick={onClose}>Close</button>
         </div>
       </div>

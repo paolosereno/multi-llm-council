@@ -55,6 +55,12 @@ export const api = {
     return response.json();
   },
 
+  async resetStats() {
+    const response = await fetch(`${API_BASE}/api/stats/reset`, { method: 'POST' });
+    if (!response.ok) throw new Error('Failed to reset stats');
+    return response.json();
+  },
+
   /**
    * Get council configuration.
    */

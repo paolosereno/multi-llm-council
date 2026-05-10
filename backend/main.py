@@ -88,12 +88,25 @@ async def get_conversation(conversation_id: str):
     return conversation
 
 
+def _stats_reset_path():
+    return os.path.join(os.path.dirname(storage.DATA_DIR), "stats_reset.json")
+
+
+def _get_stats_reset_at():
+    path = _stats_reset_path()
+    if os.path.exists(path):
+        with open(path) as f:
+            return json.load(f).get("reset_at")
+    return None
+
+
 @app.get("/api/stats")
 async def get_stats():
     """Aggregate model performance statistics across all stored conversations."""
     from collections import defaultdict
     from .council import parse_ranking_from_text
 
+    reset_at = _get_stats_reset_at()
     storage.ensure_data_dir()
     model_stats = defaultdict(lambda: {'appearances': 0, 'rankings_received': 0, 'rank_sum': 0, 'wins': 0})
     total_runs = 0
@@ -103,6 +116,9 @@ async def get_stats():
             continue
         conv = storage.get_conversation(filename[:-5])
         if conv is None:
+            continue
+
+        if reset_at and conv.get("created_at", "") < reset_at:
             continue
 
         for msg in conv.get('messages', []):
@@ -147,7 +163,19 @@ async def get_stats():
 
     stats.sort(key=lambda x: (x['average_rank'] or 999))
 
-    return {'models': stats, 'total_council_runs': total_runs}
+    return {'models': stats, 'total_council_runs': total_runs, 'reset_at': reset_at}
+
+
+@app.post("/api/stats/reset")
+async def reset_stats():
+    """Reset statistics: only conversations after this point will be counted."""
+    from datetime import datetime
+    reset_at = datetime.utcnow().isoformat()
+    path = _stats_reset_path()
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w') as f:
+        json.dump({"reset_at": reset_at}, f)
+    return {"reset_at": reset_at}
 
 
 @app.get("/api/config")
