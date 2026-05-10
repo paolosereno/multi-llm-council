@@ -130,6 +130,10 @@
   color: var(--text-primary);
 }
 
+.model-row-link {
+  cursor: pointer;
+}
+
 .models-table tr:hover td {
   background: var(--bg-hover);
 }

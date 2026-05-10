@@ -103,7 +103,11 @@ export default function ModelsPage({ onClose }) {
             </thead>
             <tbody>
               {sorted.map((m) => (
-                <tr key={m.id}>
+                <tr
+                  key={m.id}
+                  className="model-row-link"
+                  onClick={() => window.open(`https://openrouter.ai/${m.id}`, '_blank', 'noopener,noreferrer')}
+                >
                   <td>
                     <div className="model-name-cell">{m.name}</div>
                     {m.description && <div className="model-desc">{m.description}</div>}
