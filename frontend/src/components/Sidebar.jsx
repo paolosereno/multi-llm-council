@@ -38,27 +38,25 @@ export default function Sidebar({
           currentConversation={currentConversation}
           theme={theme}
         />
-      )}}
+      )}
       <div className="sidebar-header">
-        <div className="sidebar-header-top">
-          <h1>LLM Council</h1>
-          <div className="sidebar-header-actions">
-            <button className="theme-toggle-btn" onClick={onToggleTheme} title="Toggle theme">
-              {theme === 'dark' ? '☀' : '☾'}
-            </button>
-            <button className="theme-toggle-btn" onClick={() => setStatsOpen(true)} title="Model statistics">
-              ▤
-            </button>
-            <button className="theme-toggle-btn" onClick={() => setMetricsOpen(true)} title="Performance metrics">
-              ≋
-            </button>
-            <button className="theme-toggle-btn" onClick={() => setHelpOpen(true)} title="Help">
-              ?
-            </button>
-            <button className="theme-toggle-btn" onClick={() => setSettingsOpen(true)} title="Settings">
-              ⚙
-            </button>
-          </div>
+        <h1 className="sidebar-title">LLM Council</h1>
+        <div className="sidebar-header-actions">
+          <button className="theme-toggle-btn" onClick={onToggleTheme} title="Toggle theme">
+            {theme === 'dark' ? '☀' : '☾'}
+          </button>
+          <button className="theme-toggle-btn" onClick={() => setStatsOpen(true)} title="Model statistics">
+            ▤
+          </button>
+          <button className="theme-toggle-btn" onClick={() => setMetricsOpen(true)} title="Performance metrics">
+            ~
+          </button>
+          <button className="theme-toggle-btn" onClick={() => setHelpOpen(true)} title="Help">
+            ?
+          </button>
+          <button className="theme-toggle-btn" onClick={() => setSettingsOpen(true)} title="Settings">
+            ⚙
+          </button>
         </div>
         <button className="new-conversation-btn" onClick={onNewConversation}>
           + New Conversation
