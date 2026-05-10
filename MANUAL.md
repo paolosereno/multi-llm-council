@@ -28,6 +28,8 @@ When you submit a query, the council runs a three-stage deliberation process:
 
 Each stage is shown in the chat as a collapsible section. Stage 1 and Stage 3 start expanded; Stage 2 starts collapsed to keep the view clean.
 
+If a model fails to respond, its tab in Stage 1 is shown in red with a ⚠ indicator. The error detail is visible in the tab content. Failed models are automatically excluded from Stage 2 ranking.
+
 ---
 
 ## ⌨️ Sending a message
@@ -35,6 +37,7 @@ Each stage is shown in the chat as a collapsible section. Stage 1 and Stage 3 st
 - `Enter` — send the message
 - `Shift` + `Enter` — new line without sending
 - Click **+ New Conversation** in the sidebar to start a new chat.
+- Maximum message length is **10,000 characters**. A counter appears when you exceed 80% of the limit and turns red at the limit.
 
 ---
 

@@ -18,6 +18,9 @@ const sections = [
           <span className="help-stage-badge">Stage 3</span>
           <span>The Chairman reads everything and produces the final synthesized answer.</span>
         </div>
+        <p style={{ marginTop: 10, fontSize: 13, color: 'var(--text-secondary)' }}>
+          If a model fails, its tab in Stage 1 is shown in red with a ⚠ indicator. Failed models are excluded from Stage 2 ranking automatically.
+        </p>
       </div>
     ),
   },
@@ -29,6 +32,7 @@ const sections = [
         <li><kbd>Enter</kbd> — send the message</li>
         <li><kbd>Shift</kbd> + <kbd>Enter</kbd> — new line without sending</li>
         <li>Click <strong>+ New Conversation</strong> in the sidebar to start a new chat.</li>
+        <li>Maximum message length is <strong>10,000 characters</strong> — a counter appears near the limit.</li>
       </ul>
     ),
   },
