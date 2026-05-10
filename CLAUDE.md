@@ -24,7 +24,7 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 - `query_models_parallel()`: Parallel queries using `asyncio.gather()`
 - Returns dict with `content`, `latency_ms`, `prompt_tokens`, `completion_tokens`, `cost`
 - Graceful degradation: returns None on failure, continues with successful responses
-- Headers include `X-Title: LLM Council` and `HTTP-Referer` for OpenRouter app identification
+- Headers include `X-Title: Multi LLM Council` and `HTTP-Referer: https://github.com/paolosereno/multi-llm-council` for OpenRouter app identification
 
 **`council.py`** - The Core Logic
 - `_models_for_stage(execution_mode, stage)`: selects the correct model list based on mode and stage
