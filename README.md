@@ -25,14 +25,19 @@ This is a fork of [karpathy/llm-council](https://github.com/karpathy/llm-council
 ## Screenshots
 
 ![Screenshot 1](screenshot1.jpg)
+*Performance metrics dashboard — historical latency, token usage, and cost per model*
 
 ![Screenshot 2](screenshot2.jpg)
+*Quick Reference panel — Stage 2 peer rankings and aggregate model rankings visible in the background*
 
 ![Screenshot 3](screenshot3.jpg)
+*Council Settings — execution modes overview and model list configuration (Fast, Budget, Chairman)*
 
 ![Screenshot 4](screenshot4.jpg)
+*Chat interface after a council run — three collapsible stages with Budget mode active*
 
 ![Screenshot 5](screenshot5.jpg)
+*OpenRouter Model Catalogue — full model list with sortable columns for context window and pricing*
 
 ## Setup
 
