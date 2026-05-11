@@ -56,6 +56,19 @@ class CouncilConfigRequest(BaseModel):
     budget_models: List[str] = []
 
 
+class CreateFolderRequest(BaseModel):
+    name: str
+    parent_id: Optional[str] = None
+
+
+class RenameFolderRequest(BaseModel):
+    name: str
+
+
+class AssignFolderRequest(BaseModel):
+    folder_id: Optional[str] = None
+
+
 class ConversationMetadata(BaseModel):
     """Conversation metadata for list view."""
     id: str
@@ -99,6 +112,35 @@ async def get_conversation(conversation_id: str):
     if conversation is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return conversation
+
+
+@app.get("/api/folders")
+async def get_folders():
+    return storage.get_folders()
+
+
+@app.post("/api/folders")
+async def create_folder(request: CreateFolderRequest):
+    return storage.create_folder(request.name, request.parent_id)
+
+
+@app.put("/api/folders/{folder_id}")
+async def rename_folder(folder_id: str, request: RenameFolderRequest):
+    if not storage.rename_folder(folder_id, request.name):
+        raise HTTPException(status_code=404, detail="Folder not found")
+    return {"ok": True}
+
+
+@app.delete("/api/folders/{folder_id}")
+async def delete_folder(folder_id: str):
+    storage.delete_folder(folder_id)
+    return {"ok": True}
+
+
+@app.put("/api/conversations/{conversation_id}/folder")
+async def assign_conversation_folder(conversation_id: str, request: AssignFolderRequest):
+    storage.assign_conversation_folder(conversation_id, request.folder_id)
+    return {"ok": True}
 
 
 def _stats_reset_path():

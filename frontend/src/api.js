@@ -225,4 +225,43 @@ export const api = {
       onEvent('error', { type: 'error', message: 'Connection closed unexpectedly.' });
     }
   },
+
+  async getFolders() {
+    const res = await fetch(`${API_BASE}/api/folders`);
+    if (!res.ok) throw new Error('Failed to get folders');
+    return res.json();
+  },
+
+  async createFolder(name, parentId = null) {
+    const res = await fetch(`${API_BASE}/api/folders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, parent_id: parentId }),
+    });
+    if (!res.ok) throw new Error('Failed to create folder');
+    return res.json();
+  },
+
+  async renameFolder(folderId, name) {
+    const res = await fetch(`${API_BASE}/api/folders/${folderId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    if (!res.ok) throw new Error('Failed to rename folder');
+  },
+
+  async deleteFolder(folderId) {
+    const res = await fetch(`${API_BASE}/api/folders/${folderId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to delete folder');
+  },
+
+  async assignConversationFolder(convId, folderId) {
+    const res = await fetch(`${API_BASE}/api/conversations/${convId}/folder`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ folder_id: folderId }),
+    });
+    if (!res.ok) throw new Error('Failed to assign folder');
+  },
 };

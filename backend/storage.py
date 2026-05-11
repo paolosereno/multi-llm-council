@@ -188,6 +188,8 @@ def delete_conversation(conversation_id: str) -> bool:
     if not os.path.exists(path):
         return False
     os.remove(path)
+    if os.path.exists(FOLDERS_PATH):
+        assign_conversation_folder(conversation_id, None)
     return True
 
 
@@ -205,3 +207,73 @@ def update_conversation_title(conversation_id: str, title: str):
 
     conversation["title"] = title
     save_conversation(conversation)
+
+
+# ---------------------------------------------------------------------------
+# Folder storage
+# ---------------------------------------------------------------------------
+
+FOLDERS_PATH = "data/folders.json"
+
+
+def _load_folders() -> Dict[str, Any]:
+    if not os.path.exists(FOLDERS_PATH):
+        return {"folders": [], "assignments": {}}
+    with open(FOLDERS_PATH, 'r') as f:
+        return json.load(f)
+
+
+def _save_folders(data: Dict[str, Any]):
+    os.makedirs(os.path.dirname(FOLDERS_PATH), exist_ok=True)
+    with open(FOLDERS_PATH, 'w') as f:
+        json.dump(data, f, indent=2)
+
+
+def _descendant_ids(folders: List[Dict], parent_id: str) -> set:
+    result = set()
+    for f in folders:
+        if f.get("parent_id") == parent_id:
+            result.add(f["id"])
+            result |= _descendant_ids(folders, f["id"])
+    return result
+
+
+def get_folders() -> Dict[str, Any]:
+    return _load_folders()
+
+
+def create_folder(name: str, parent_id: Optional[str] = None) -> Dict[str, Any]:
+    import uuid as _uuid_mod
+    data = _load_folders()
+    folder = {"id": str(_uuid_mod.uuid4()), "name": name, "parent_id": parent_id}
+    data["folders"].append(folder)
+    _save_folders(data)
+    return folder
+
+
+def rename_folder(folder_id: str, name: str) -> bool:
+    data = _load_folders()
+    for f in data["folders"]:
+        if f["id"] == folder_id:
+            f["name"] = name
+            _save_folders(data)
+            return True
+    return False
+
+
+def delete_folder(folder_id: str):
+    data = _load_folders()
+    to_remove = _descendant_ids(data["folders"], folder_id)
+    to_remove.add(folder_id)
+    data["folders"] = [f for f in data["folders"] if f["id"] not in to_remove]
+    data["assignments"] = {k: v for k, v in data["assignments"].items() if v not in to_remove}
+    _save_folders(data)
+
+
+def assign_conversation_folder(conv_id: str, folder_id: Optional[str]):
+    data = _load_folders()
+    if folder_id is None:
+        data["assignments"].pop(conv_id, None)
+    else:
+        data["assignments"][conv_id] = folder_id
+    _save_folders(data)

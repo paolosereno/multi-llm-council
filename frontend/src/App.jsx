@@ -12,6 +12,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [showModels, setShowModels] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  const [folders, setFolders] = useState([]);
+  const [assignments, setAssignments] = useState({});
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -20,9 +22,10 @@ function App() {
 
   const handleToggleTheme = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'));
 
-  // Load conversations on mount
+  // Load conversations and folders on mount
   useEffect(() => {
     loadConversations();
+    loadFolders();
   }, []);
 
   // Load conversation details when selected
@@ -38,6 +41,16 @@ function App() {
       setConversations(convs);
     } catch (error) {
       console.error('Failed to load conversations:', error);
+    }
+  };
+
+  const loadFolders = async () => {
+    try {
+      const data = await api.getFolders();
+      setFolders(data.folders || []);
+      setAssignments(data.assignments || {});
+    } catch (error) {
+      console.error('Failed to load folders:', error);
     }
   };
 
@@ -71,6 +84,7 @@ function App() {
     try {
       await api.deleteConversation(id);
       setConversations((prev) => prev.filter((c) => c.id !== id));
+      setAssignments((prev) => { const next = { ...prev }; delete next[id]; return next; });
       if (currentConversationId === id) {
         setCurrentConversationId(null);
         setCurrentConversation(null);
@@ -78,6 +92,50 @@ function App() {
     } catch (error) {
       console.error('Failed to delete conversation:', error);
     }
+  };
+
+  function _descendantIds(allFolders, parentId) {
+    const result = new Set();
+    for (const f of allFolders) {
+      if (f.parent_id === parentId) {
+        result.add(f.id);
+        for (const id of _descendantIds(allFolders, f.id)) result.add(id);
+      }
+    }
+    return result;
+  }
+
+  const handleCreateFolder = async (name, parentId = null) => {
+    const folder = await api.createFolder(name, parentId);
+    setFolders((prev) => [...prev, folder]);
+    return folder;
+  };
+
+  const handleRenameFolder = async (folderId, name) => {
+    await api.renameFolder(folderId, name);
+    setFolders((prev) => prev.map((f) => (f.id === folderId ? { ...f, name } : f)));
+  };
+
+  const handleDeleteFolder = async (folderId) => {
+    await api.deleteFolder(folderId);
+    const toRemove = _descendantIds(folders, folderId);
+    toRemove.add(folderId);
+    setFolders((prev) => prev.filter((f) => !toRemove.has(f.id)));
+    setAssignments((prev) => {
+      const next = { ...prev };
+      Object.keys(next).forEach((k) => { if (toRemove.has(next[k])) delete next[k]; });
+      return next;
+    });
+  };
+
+  const handleAssignFolder = async (convId, folderId) => {
+    await api.assignConversationFolder(convId, folderId);
+    setAssignments((prev) => {
+      const next = { ...prev };
+      if (folderId === null) delete next[convId];
+      else next[convId] = folderId;
+      return next;
+    });
   };
 
   const handleRerun = async (content, systemPrompt, targetIndex, executionMode = 'normal') => {
@@ -312,6 +370,12 @@ function App() {
         onToggleTheme={handleToggleTheme}
         showModels={showModels}
         onToggleModels={() => setShowModels((v) => !v)}
+        folders={folders}
+        assignments={assignments}
+        onCreateFolder={handleCreateFolder}
+        onRenameFolder={handleRenameFolder}
+        onDeleteFolder={handleDeleteFolder}
+        onAssignFolder={handleAssignFolder}
       />
       {showModels ? (
         <ModelsPage onClose={() => setShowModels(false)} />

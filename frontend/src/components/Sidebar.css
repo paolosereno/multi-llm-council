@@ -111,8 +111,8 @@
 
 .conversation-item {
   position: relative;
-  padding: 12px;
-  margin-bottom: 4px;
+  padding: 10px 12px;
+  margin-bottom: 2px;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s;
@@ -120,31 +120,6 @@
 
 .conversation-item:hover {
   background: var(--bg-hover);
-}
-
-.delete-conversation-btn {
-  display: none;
-  position: absolute;
-  top: 50%;
-  right: 8px;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 18px;
-  line-height: 1;
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 4px;
-}
-
-.conversation-item:hover .delete-conversation-btn {
-  display: block;
-}
-
-.delete-conversation-btn:hover {
-  color: var(--danger);
-  background: var(--danger-bg);
 }
 
 .conversation-item.active {
@@ -156,9 +131,220 @@
   color: var(--text-primary);
   font-size: 14px;
   margin-bottom: 4px;
+  padding-right: 52px;
 }
 
 .conversation-meta {
   color: var(--text-muted);
   font-size: 12px;
+}
+
+/* Actions row (move + delete) shown on hover */
+.conv-row-actions {
+  display: none;
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  align-items: center;
+  gap: 2px;
+}
+
+.conversation-item:hover .conv-row-actions {
+  display: flex;
+}
+
+.conv-action-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+.conv-action-btn:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.delete-conversation-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.delete-conversation-btn:hover {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+/* Move-to-folder dropdown */
+.move-wrapper {
+  position: relative;
+}
+
+.move-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 180px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 200;
+  overflow: hidden;
+}
+
+.move-menu-item {
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.move-menu-item:hover {
+  background: var(--bg-hover);
+}
+
+.move-menu-item-current {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* Folder tree */
+.folder-node {
+  margin-bottom: 1px;
+}
+
+.folder-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px 6px 8px;
+  border-radius: 6px;
+  cursor: default;
+}
+
+.folder-header:hover {
+  background: var(--bg-hover);
+}
+
+.folder-header:hover .folder-header-actions {
+  display: flex;
+}
+
+.folder-toggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 9px;
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.folder-toggle:hover {
+  color: var(--text-primary);
+}
+
+.folder-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+
+.folder-rename-input {
+  flex: 1;
+  font-size: 13px;
+  font-family: inherit;
+  padding: 2px 6px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.folder-header-actions {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.folder-action-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 1px 4px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.folder-action-btn:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.folder-action-delete:hover {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.folder-children {
+  padding-left: 10px;
+}
+
+/* Unorganized section */
+.unorganized-section {
+  margin-top: 4px;
+}
+
+.unorganized-header {
+  padding: 6px 12px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+/* New Folder button */
+.new-folder-btn {
+  display: block;
+  width: calc(100% - 16px);
+  margin: 8px 8px 4px;
+  padding: 7px 10px;
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.new-folder-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
 }
