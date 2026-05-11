@@ -53,6 +53,7 @@ function ConversationRow({ conv, isActive, folders, assignments, onSelect, onDel
   return (
     <div
       className={`conversation-item ${isActive ? 'active' : ''}`}
+      style={showMove ? { zIndex: 1 } : undefined}
       onClick={() => onSelect(conv.id)}
     >
       <div className="conversation-title">{conv.title || 'New Conversation'}</div>
