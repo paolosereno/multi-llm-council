@@ -57,7 +57,7 @@ function ConversationRow({ conv, isActive, folders, assignments, onSelect, onDel
     >
       <div className="conversation-title">{conv.title || 'New Conversation'}</div>
       <div className="conversation-meta">{conv.message_count} messages</div>
-      <div className="conv-row-actions">
+      <div className="conv-row-actions" style={showMove ? { display: 'flex' } : undefined}>
         <div className="move-wrapper">
           <button
             className="conv-action-btn"
