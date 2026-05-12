@@ -51,11 +51,19 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 - Each conversation: `{id, created_at, messages[]}`
 - Assistant messages contain: `{role, stage1, stage2, stage3}`
 - Note: metadata (label_to_model, aggregate_rankings) is NOT persisted to storage, only returned via API
+- Folder storage in `data/folders.json`: `{folders: [{id, name, parent_id}], assignments: {conv_id: folder_id}}`
+- `FOLDERS_PATH = "data/folders.json"` constant at module level
+- `get_folders()`, `create_folder(name, parent_id)`, `rename_folder(folder_id, name)`, `delete_folder(folder_id)`, `assign_conversation_folder(conv_id, folder_id)`
+- `_descendant_ids(folders, parent_id)`: recursive set of all descendant folder IDs; used by `delete_folder` to cascade-delete subtrees and clean up assignments
+- `delete_conversation` cleans up the folder assignment (calls `assign_conversation_folder(id, None)`) if `folders.json` exists
 
 **`main.py`**
 - FastAPI app with CORS enabled for localhost:5173 and localhost:3000
 - `SendMessageRequest` includes `execution_mode: str = 'normal'` and a `field_validator` that rejects empty content and messages over 10,000 characters
 - `CouncilConfigRequest` includes `fast_models: List[str] = []` and `budget_models: List[str] = []`
+- `CreateFolderRequest(name, parent_id?)`, `RenameFolderRequest(name)`, `AssignFolderRequest(folder_id?)` request models
+- `GET /api/folders`, `POST /api/folders`, `PUT /api/folders/{folder_id}`, `DELETE /api/folders/{folder_id}`: folder CRUD
+- `PUT /api/conversations/{conversation_id}/folder`: assign/unassign a conversation to a folder (`folder_id: null` removes assignment)
 - `GET /api/models`: proxy to OpenRouter models list, returns `id`, `name`, `description`, `context_length`, `pricing` per model
 - `GET /api/config` / `PUT /api/config`: read/write runtime config including fast/budget model lists
 - `GET /api/stats`: aggregate model performance statistics
@@ -73,12 +81,16 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 - `error` event handler in both functions: clears all `loading` flags in the assistant message and sets `streamError` to the error message string; `setIsLoading(false)`
 - `showModels` boolean state: when true renders `ModelsPage` instead of `ChatInterface`
 - Important: metadata is stored in the UI state for display but not persisted to backend JSON
+- `folders` and `assignments` state loaded on mount via `loadFolders()`
+- `_descendantIds(allFolders, parentId)`: mirrors backend logic for optimistic UI update on folder delete
+- `handleCreateFolder`, `handleRenameFolder`, `handleDeleteFolder`, `handleAssignFolder`: call API and update local state; delete cascades through descendant folder IDs
 
 **`api.js`**
 - `sendMessageStream(conversationId, content, systemPrompt, history, executionMode, onEvent)`
 - `rerunStream(conversationId, content, systemPrompt, executionMode, onEvent)`
 - `getModels()`: calls `GET /api/models` to fetch OpenRouter model catalogue
 - Both stream functions track a `streamEnded` flag; if the reader loop exits without a `complete` or `error` event (e.g. backend crash), they fire a synthetic `error` event with "Connection closed unexpectedly."
+- `getFolders()`, `createFolder(name, parentId)`, `renameFolder(folderId, name)`, `deleteFolder(folderId)`, `assignConversationFolder(convId, folderId)`: folder management API calls
 
 **`components/ChatInterface.jsx`**
 - Multiline textarea (3 rows, resizable), max 10,000 characters enforced client-side
@@ -117,6 +129,14 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 - Uses Recharts (BarChart, ResponsiveContainer)
 - `formatCost()`: shows USD values per 1M tokens; shows "free" for 0
 
+**`components/Sidebar.jsx`** (folder hierarchy)
+- `buildMenuItems(folders, parentId, depth)`: builds a flat list of `{folder, depth}` items for the "Move to folder" dropdown, in tree order
+- `MoveMenu` component: dropdown anchored to the 📁 button; `document.addEventListener('mousedown')` for outside-click to close
+- `ConversationRow` component: shows title + meta; on hover reveals `.conv-row-actions` (move + delete buttons)
+  - When the move menu is open: `style={{ zIndex: 1 }}` on the row creates a stacking context so siblings don't overlap; `style={{ display: 'flex' }}` on `.conv-row-actions` keeps it visible while the cursor is over the dropdown
+- `FolderNode` recursive component: expand/collapse toggle, inline rename on double-click, hover actions (+subfolder, ×delete)
+- Main `Sidebar`: all folders start expanded on first render (via `useRef` flag, preserving user changes); search shows a flat filtered list; "Unorganized" header only when folders exist; `+ New Folder` button at bottom; `window.prompt()` for folder/subfolder naming
+
 **`components/ModelsPage.jsx` + `ModelsPage.css`**
 - Full-page view replacing ChatInterface when active (toggled via ⊟ sidebar button)
 - Fetches all models from `GET /api/models` on mount; shows loading/error states
@@ -130,6 +150,9 @@ Multi LLM Council is a 3-stage deliberation system where multiple LLMs collabora
 - Primary color: #4a90e2 (blue)
 - Global markdown styling in `index.css` with `.markdown-content` class
 - `.sidebar-btn-active`: blue highlight for active sidebar icon buttons
+- `Sidebar.css` folder-specific classes: `.folder-node`, `.folder-header`, `.folder-header-actions` (hidden, shown on hover), `.folder-toggle`, `.folder-name`, `.folder-rename-input`, `.folder-children` (padding-left: 10px for nesting), `.unorganized-section`, `.unorganized-header`, `.new-folder-btn`
+- `.move-wrapper { position: relative }` anchors `.move-menu { position: absolute; top: calc(100%+4px); z-index: 200 }`
+- `.conv-row-actions { display: none }` — overridden by inline `display: flex` when move menu is open
 
 ## Key Design Decisions
 
@@ -190,8 +213,10 @@ Runtime config is saved to `data/council_config.json`. The file includes all fou
 4. **Missing Metadata**: Metadata is ephemeral (not persisted), only available in API responses
 5. **Model list fallback**: Empty fast_models or budget_models silently fall back to council_models — check ⚠ in UI
 6. **Error response format**: `query_model()` now returns `{'error': str(e)}` on failure (not `None`). Code that checks `if response is not None` must also check `if 'error' not in response` to skip failures
+7. **Folder dropdown overlap**: `.conversation-item` has `position: relative` but no `z-index` by default, so later DOM siblings paint on top. Fix: add `z-index: 1` inline when the move menu is open — this creates a stacking context without touching CSS.
+8. **Folder dropdown disappears on hover**: CSS `:hover` hides `.conv-row-actions` when the cursor leaves the row. Fix: override `display` with an inline style (`display: 'flex'`) whenever the move menu is open, bypassing the CSS hover rule.
 
-## Features Implemented (as of 2026-05-10)
+## Features Implemented (as of 2026-05-12)
 
 - Multi-model deliberation (3 stages, async/parallel)
 - Collapsible stages in UI
@@ -209,6 +234,7 @@ Runtime config is saved to `data/council_config.json`. The file includes all fou
 - Per-model timeout (60s via httpx) and per-stage timeout (90s via asyncio.wait_for)
 - Stream error display: inline banner in chat when a stage times out or the stream closes unexpectedly
 - OpenRouter model catalogue page (⊟ button in sidebar): sortable/searchable table with name, ID, context window, input/output pricing
+- Folder hierarchy in sidebar: nested folders, move conversations between folders, rename/delete folders (cascade), "Unorganized" section for unassigned conversations; persisted server-side in `data/folders.json`
 
 ## Data Flow Summary
 

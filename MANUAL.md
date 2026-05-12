@@ -89,6 +89,21 @@ Click the **↺** button in the header of any completed response to re-run the c
 | Search | Type in the **Search** field in the sidebar — filters in real time by title. |
 | Delete | Click **×** next to a conversation. |
 | Export | Click **Export MD** in the top bar to download the conversation as a Markdown file. |
+| Move to folder | Hover over a conversation and click **📁** — a dropdown lists all available folders. Click a folder to assign the conversation; click **— No folder** to remove the assignment. |
+
+### Folders
+
+Folders let you organise conversations into a hierarchy. They are persisted on the server (not in the browser), so they survive cache clears.
+
+| Action | How |
+|--------|-----|
+| Create a top-level folder | Click **+ New Folder** at the bottom of the sidebar. |
+| Create a subfolder | Hover over an existing folder and click **+** — a prompt asks for the name. |
+| Rename a folder | Double-click the folder name to edit it inline; press **Enter** or click away to confirm. |
+| Delete a folder | Hover over a folder and click **×**. All subfolders are deleted too; conversations are unassigned (not deleted). |
+| Expand / collapse | Click the **▶ / ▼** arrow to the left of the folder name. |
+
+Conversations not assigned to any folder appear under an **Unorganized** heading (visible only when at least one folder exists).
 
 ---
 

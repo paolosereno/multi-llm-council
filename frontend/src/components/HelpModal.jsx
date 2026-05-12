@@ -104,11 +104,22 @@ const sections = [
     icon: '💬',
     title: 'Managing conversations',
     content: (
-      <ul className="help-list">
-        <li>Search by title in the <strong>Search</strong> field in the sidebar — filters in real time.</li>
-        <li>Click <strong>×</strong> next to a conversation to delete it.</li>
-        <li>Click <strong>Export MD</strong> in the top bar to download the conversation as a Markdown file.</li>
-      </ul>
+      <div>
+        <ul className="help-list">
+          <li>Search by title in the <strong>Search</strong> field in the sidebar — filters in real time.</li>
+          <li>Click <strong>×</strong> next to a conversation to delete it.</li>
+          <li>Click <strong>Export MD</strong> in the top bar to download the conversation as a Markdown file.</li>
+          <li>Hover over a conversation and click <strong>📁</strong> to move it to a folder (or remove the assignment with <strong>— No folder</strong>).</li>
+        </ul>
+        <p style={{ marginTop: 8, marginBottom: 4 }}><strong>Folders</strong> — persisted on the server, survive cache clears.</p>
+        <ul className="help-list">
+          <li>Click <strong>+ New Folder</strong> at the bottom of the sidebar to create a top-level folder.</li>
+          <li>Hover over a folder and click <strong>+</strong> to add a subfolder.</li>
+          <li>Double-click a folder name to rename it inline.</li>
+          <li>Hover over a folder and click <strong>×</strong> to delete it (subfolders are removed too; conversations are unassigned, not deleted).</li>
+          <li>Conversations with no folder appear under <strong>Unorganized</strong>.</li>
+        </ul>
+      </div>
     ),
   },
   {
