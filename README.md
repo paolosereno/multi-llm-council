@@ -109,6 +109,7 @@ Then open http://localhost:5173 in your browser.
 - **Model statistics** — The ▤ icon opens a dashboard showing each model's average rank, win count, and win rate across all past council runs. Stats can be reset to start fresh.
 - **Performance metrics** — The ~ icon opens a metrics dashboard with latency, token usage, and cost per model for the latest run and aggregated historical averages (powered by Recharts).
 - **Light / dark theme** — Toggle with the ☾/☀ button in the sidebar header.
+- **Folder hierarchy** — Organise conversations into nested folders directly in the sidebar. Folders are persisted server-side (`data/folders.json`) so they survive browser cache clears. Supports create, rename (inline double-click), delete (cascades to subfolders), and move conversations between folders via a 📁 dropdown. Unassigned conversations appear under an "Unorganized" section.
 - **Conversation search** — Filter the sidebar list in real time by title.
 - **Markdown export** — Export any conversation to a `.md` file.
 - **Delete conversations** — Remove individual conversations from the sidebar.
@@ -117,7 +118,7 @@ Then open http://localhost:5173 in your browser.
 
 - **Backend:** FastAPI (Python 3.10+), async httpx, OpenRouter API
 - **Frontend:** React + Vite, react-markdown, Recharts
-- **Storage:** JSON files in `data/conversations/`
+- **Storage:** JSON files in `data/conversations/`, folder metadata in `data/folders.json`
 - **Package Management:** uv for Python, npm for JavaScript
 
 ## Credits
